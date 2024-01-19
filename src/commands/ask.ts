@@ -25,7 +25,7 @@ export const AskSlashCommand: SlashCommand = {
       [
         '-u',
         './python_src/ask.py',
-        `'${query}'` // BE WARE OF COMMAND INJECTION
+        `${query}`
       ]
     );
 

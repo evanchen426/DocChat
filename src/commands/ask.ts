@@ -19,7 +19,7 @@ export const AskSlashCommand: SlashCommand = {
       return;
     }
 
-    let respMsg = 'Response:\n';
+    let respMsg = '';
     const pythonExec = await spawn(
       'python3',
       [

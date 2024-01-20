@@ -1,54 +1,37 @@
 from argparse import ArgumentParser
 import os
 
-from whoosh.qparser import QueryParser
-from whoosh.index import open_dir
-
-from utils.database import (
-    MY_SCORE_FUNC, SEARCH_TOP_K, MY_ANALYZER
-)
+from utils.search import search_module
+from utils.prompt import prompt_module
+from utils.ai_caller import ai_caller
 
 # discord's body length limit is 2000
-MAX_OUTPUT_LENGTH = 1600
+MAX_OUTPUT_LENGTH = 1800
 
-def ask_module(query_string: str):
-    assert os.path.exists('database')
-    storage = open_dir('database')
+def ask_module(question_string: str) -> str:
+    """Handle higher-level logic"""
 
-    output = f'I am ask_module\nYour question is "{query_string}"\n'
+    # print('I am ask_module')
+    relevant_doc_list = search_module(question_string)
 
-    # process texts
-    query_string = ' '.join([
-        token.text
-        for token in MY_ANALYZER(query_string)
-    ])
+    prompt = prompt_module(relevant_doc_list, question_string)
 
-    with storage.searcher(weighting=MY_SCORE_FUNC) as searcher:
-        parser = QueryParser('content', storage.schema)
-        query = parser.parse(query_string)
-        results = searcher.search(query, limit=SEARCH_TOP_K)
+    response_string = ai_caller(prompt)
 
-        output += f'I found {len(results)} article(s) regarding your question:\n'
-        result_string = [
-            '\n'.join([
-                '---',
-                f'Title: {res["title"]}',
-                f'Relevant score: {res.score}',
-                str(res['content'])
-            ])
-            for res in results
-        ]
-        output += '\n'.join(result_string)
-    return output
+    return response_string
 
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument(
-        'query_string',
+        'question_string',
         type=str
     )
-    query_string = parser.parse_args().query_string
+    question_string = parser.parse_args().question_string
     try:
-        print(ask_module(query_string)[:MAX_OUTPUT_LENGTH])
+        response_string = ask_module(question_string)
+        if len(response_string) > MAX_OUTPUT_LENGTH:
+            response_string = response_string[:MAX_OUTPUT_LENGTH]
+            response_string += '[truncated because reply length limit]'
+        print(response_string)
     except Exception as e:
         print(repr(e))

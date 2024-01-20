@@ -4,17 +4,19 @@ use [discord.js](https://github.com/discordjs/discord.js) in TypeScript to creat
 
 ## Development
 
-### Clone project
-
-```
-git clone https://github.com/yubinTW/discord-typescript-demo.git
-cd discord-typescript-demo
-```
-
 ### Install Dependency
 
 ```
+conda create -n {ENV_NAME} python=3.10 nodejs=20
 npm i
+pip install -r pip_requirements.txt
+```
+
+### (If at local) Login Google Cloud for VertexAI
+
+```
+gcloud auth application-default set-quota-project <PROJECT_ID>
+gcloud auth application-default login
 ```
 
 ### Create your `.env`

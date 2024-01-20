@@ -16,12 +16,12 @@ DOC_SEP = '---\n'
 
 DUMMY_RELEVANTDOC = RelevantDoc('n/a', 0, 'n/a')
 
-def prompt_module(
+def make_prompt(
         relevant_doc_list: List[RelevantDoc],
         question_string: str) -> str:
     """Combine relevant docs and user question into a prompt string"""
 
-    # print('I am prompt_module')
+    # print('I am make_prompt')
     if len(relevant_doc_list) == 0:
         relevant_doc_list = [DUMMY_RELEVANTDOC]
     prompt_list = [

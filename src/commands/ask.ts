@@ -13,11 +13,18 @@ export const AskSlashCommand: SlashCommand = {
         .setRequired(true)
     ),
   async execute(interaction: CommandInteraction) {
-    let query = interaction.options.get('question')?.value?.toString();
-    if (query === undefined) {
+    let question = interaction.options.get('question')?.value?.toString();
+    if (question === undefined) {
       await interaction.reply('Error parsing question.');
       return;
     }
+
+    // logging
+    console.log(
+      `User ${interaction.user.username} `
+      + `in channel ${interaction.channelId.toString()} `
+      + `ask "${question}"`
+    )
 
     let respMsg = '';
     const pythonExec = await spawn(
@@ -25,9 +32,13 @@ export const AskSlashCommand: SlashCommand = {
       [
         '-u',
         './python_src/ask.py',
-        `${query}`
+        `${question}`
       ]
     );
+
+    pythonExec.on('error', (err) => {
+      interaction.reply('Error starting ask module.');
+    })
 
     pythonExec.stdout.on('data', (data) => {
       console.log(data.toString());

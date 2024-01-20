@@ -1,4 +1,5 @@
 import os
+from typing import Callable 
 from vertexai.preview.language_models import TextGenerationModel
 
 MODEL_ID = 'text-bison@001'
@@ -20,4 +21,4 @@ def vertex_ai_caller(prompt_string: str) -> str:
 def dummy_ai_caller(prompt_string: str) -> str:
     return 'As an AI assistant, I cannot anwer this question.'
 
-ai_caller = dummy_ai_caller
+ai_caller: Callable[[str], str] = dummy_ai_caller

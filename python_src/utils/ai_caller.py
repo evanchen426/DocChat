@@ -80,7 +80,7 @@ class VertexAICaller():
                 "temperature": 0.2,
                 "max_output_tokens": 100,
                 "top_p": 0.8,
-                "top_k": 50
+                "top_k": 20
             }
         else:
             self.PARAMETERS = parameters

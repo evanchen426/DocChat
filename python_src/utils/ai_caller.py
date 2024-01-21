@@ -76,14 +76,14 @@ class VertexAICaller():
         super().__init__()
         self.MODEL_NAME = 'text-bison@001'
         if parameters is None:
-            self.parameters = {
+            self.PARAMETERS = {
                 "temperature": 0.2,
                 "max_output_tokens": 100,
                 "top_p": 0.8,
                 "top_k": 50
             }
         else:
-            self.parameters = parameters
+            self.PARAMETERS = parameters
     
     def make_prompt(
             self,
@@ -113,15 +113,12 @@ Here's the provided documents:
         ]
         return '\n'.join(prompt_list)
 
-    def send_request(
-            self,
-            prompt: str,
-            parameters: Union[dict, None] = None) -> str:
+    def send_request(self, prompt: str) -> str:
         
         model = TextGenerationModel.from_pretrained(self.MODEL_NAME)
         response = model.predict(
             prompt,
-            **parameters,
+            **self.PARAMETERS,
         )
         return response.text
 

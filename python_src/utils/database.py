@@ -1,8 +1,10 @@
 
 import os
+from time import sleep
 from typing import List, Iterable, Dict
 
 from whoosh.qparser import QueryParser
+from whoosh.writing import LockError
 from whoosh.index import open_dir
 from whoosh.fields import Schema, ID, TEXT
 from whoosh.scoring import TF_IDF, BM25F
@@ -16,16 +18,23 @@ from relevant_doc import RelevantDoc
 class DocDatabase:
 
     def __init__(self):
-        self.COLUMN_NAMES = ('title', 'content', 'id')
+        self.COLUMN_NAMES = ('filename', 'title', 'content')
 
     def add(self, **kwargs) -> None:
-        pass
+        raise NotImplementedError()
 
-    def update(self, _iterable: Iterable[Dict]) -> None:
-        pass
+    def add_batch(self, _iterable: Iterable[Dict]) -> None:
+        raise NotImplementedError()
+
+
+    def update(self, old_kwargs: Dict, new_kwargs: Dict) -> None:
+        raise NotImplementedError()
+
+    def delete(self, filename: str) -> None:
+        raise NotImplementedError()
 
     def search(query: str) -> List[RelevantDoc]:
-        pass
+        raise NotImplementedError()
 
 
 class DocDatabaseWhoosh(DocDatabase):
@@ -45,27 +54,46 @@ class DocDatabaseWhoosh(DocDatabase):
         )
 
         self.MY_SCHEMA = Schema(
+            filename=ID(),
             title=TEXT(stored=True),
             content=TEXT(
                 stored=True,
                 sortable=True,
                 analyzer=self.MY_ANALYZER
-            ),
-            id=ID(stored=True)
+            )
         )
+
+        self.TRY_LIMIT = 40
 
     def add(self, **kwargs) -> None:
         assert os.path.exists(self.STORAGE_DIR)
         storage = open_dir(self.STORAGE_DIR)
-        writer = storage.writer()
-        writer.add_document(**kwargs)
+        try_count = 0
+        while try_count < self.TRY_LIMIT:
+            try:
+                writer = storage.writer()
+                writer.add_document(**kwargs)
+                writer.commit()
+                return
+            except LockError:
+                sleep(0.01)
+        raise LockError()
+        
 
-    def update(self, _iterable: Iterable[Dict]) -> None:
+    def add_batch(self, _iterable: Iterable[Dict]) -> None:
         assert os.path.exists(self.STORAGE_DIR)
         storage = open_dir(self.STORAGE_DIR)
-        writer = storage.writer()
-        for new_doc in _iterable:
-            writer.add_document(**new_doc)
+        try_count = 0
+        while try_count < self.TRY_LIMIT:
+            try:
+                writer = storage.writer()
+                for new_doc in _iterable:
+                    writer.add_document(**new_doc)
+                writer.commit()
+                return
+            except LockError:
+                sleep(0.01)
+        raise LockError()
 
     def search(self, query: str) -> List[RelevantDoc]:
         assert os.path.exists(self.STORAGE_DIR)

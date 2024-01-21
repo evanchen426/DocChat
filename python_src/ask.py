@@ -23,10 +23,11 @@ def ask_module(
 
     if ai_backend == 'dummy':
         ai_caller = DummyAICaller()
-    elif ai_caller == 'openai':
+    elif ai_backend == 'openai':
         ai_caller = OpenAICaller()
-    elif ai_caller == 'vertexai':
+    elif ai_backend == 'vertexai':
         ai_caller = VertexAICaller()
+
     prompt = ai_caller.make_prompt(relevant_doc_list, question_string)
     response_string = ai_caller.send_request(prompt)
 
@@ -64,3 +65,4 @@ if __name__ == '__main__':
         print(response_string)
     except Exception as e:
         print(repr(e))
+        raise e

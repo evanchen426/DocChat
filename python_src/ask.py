@@ -1,22 +1,27 @@
 from argparse import ArgumentParser
 import os
 
-from utils.search import search_database
-from utils.prompt import make_prompt
-from utils.ai_caller import ai_caller
+from utils.database import DocDatabaseWhoosh
+# from utils.relevant_doc import RelevantDoc
+from utils.ai_caller import OpenAICaller, DummyAICaller
 
 # discord's body length limit is 2000
 MAX_OUTPUT_LENGTH = 1800
 
-def ask_module(question_string: str) -> str:
+
+def ask_module(question_string: str, is_debug: bool = False) -> str:
     """Handle higher-level logic"""
+    database = DocDatabaseWhoosh()
+    relevant_doc_list = database.search(question_string)
+    if is_debug:
+        print('---\n'.join(
+            map(str, relevant_doc_list)
+        ))
 
-    # print('I am ask_module')
-    relevant_doc_list = search_database(question_string)
-
-    prompt = make_prompt(relevant_doc_list, question_string)
-
-    response_string = ai_caller(prompt)
+    # ai_caller = OpenAICaller()
+    ai_caller = DummyAICaller()
+    prompt = ai_caller.make_prompt(relevant_doc_list, question_string)
+    response_string = ai_caller.send_request(prompt)
 
     return response_string
 
@@ -26,9 +31,15 @@ if __name__ == '__main__':
         'question_string',
         type=str
     )
-    question_string = parser.parse_args().question_string
+    parser.add_argument(
+        '--debug',
+        action='store_true'
+    )
+    args = parser.parse_args()
+    question_string = args.question_string
+    is_debug = args.debug
     try:
-        response_string = ask_module(question_string)
+        response_string = ask_module(question_string, is_debug=is_debug)
         if len(response_string) > MAX_OUTPUT_LENGTH:
             response_string = response_string[:MAX_OUTPUT_LENGTH]
             response_string += '[truncated because of reply length limit]'

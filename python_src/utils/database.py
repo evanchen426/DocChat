@@ -12,7 +12,7 @@ from whoosh.analysis import (
     RegexAnalyzer, StemmingAnalyzer, LowercaseFilter, StopFilter
 )
 
-from relevant_doc import RelevantDoc
+from .relevant_doc import RelevantDoc
 
 
 class DocDatabase:
@@ -39,10 +39,11 @@ class DocDatabase:
 
 class DocDatabaseWhoosh(DocDatabase):
 
-    def __init__(self):
-        self.STORAGE_DIR = './database'
+    def __init__(self, storage_dir='./database', topk=1):
+        super().__init__()
+        self.STORAGE_DIR = storage_dir
 
-        self.SEARCH_TOP_K = 5
+        self.SEARCH_TOP_K = topk
 
         # self.MY_SCORE_FUNC = TF_IDF()
         self.MY_SCORE_FUNC = BM25F()

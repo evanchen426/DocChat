@@ -46,12 +46,11 @@ export const AskSlashCommand: SlashCommand = {
     });
 
     pythonExec.on('close', (code) => {
-      if (code == 0) {
-        interaction.reply(respMsg);
+      if (code != 0) {
+        respMsg = 'Error getting response';
       }
-      else {
-        interaction.reply('Error getting response.');
-      }
-    })
+      interaction.reply(respMsg);
+    });
+    
   }
 }

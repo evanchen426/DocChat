@@ -1,16 +1,23 @@
 import { Client, GatewayIntentBits } from 'discord.js'
 import dotenv from 'dotenv'
 import { cleanEnv, str } from 'envalid'
+import { spawn } from 'child_process'
+
 
 import { setBotListener } from './bot'
 import { PingSlashCommand } from './commands/ping'
 import { AskSlashCommand } from './commands/ask'
+import { NewChannelSlashCommand } from './commands/new_channel'
 import { deploySlashCommands } from './deploy'
 import { SlashCommand } from './types/command'
 import { AppConfig } from './types/config'
 
 // Register commands
-const commandList: Array<SlashCommand> = [PingSlashCommand, AskSlashCommand]
+const commandList: Array<SlashCommand> = [
+  PingSlashCommand,
+  AskSlashCommand,
+  NewChannelSlashCommand
+]
 
 // Read .env file (if exist)
 dotenv.config()
@@ -34,7 +41,9 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
 // Deploy commands to a Discord chat server
 deploySlashCommands(appConfig, commandList)
-  .then((response) => console.log(`Deploy ${response.length} commands: ${response.map((c) => c.name)} successfully!`))
+  .then((response) => console.log(
+    `Deploy ${response.length} commands: ${response.map((c) => c.name)} successfully!`
+  ))
   .catch((reason) => console.log(`Failed to deploy commands: ${reason}`))
 
 // Add event listener from discord
@@ -45,3 +54,8 @@ client
   .login(appConfig.token)
   .then(() => console.log(`Login successfully!`))
   .catch((reason) => console.log(`Failed to login: ${reason}`))
+
+const pythonExec = spawn(
+  'python3',
+  ['./python_src/upload.py']
+);

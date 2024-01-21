@@ -1,34 +1,56 @@
 import os
-from typing import List, Callable
+from typing import List, Union, TypeVar
 
 from .relevant_doc import RelevantDoc 
 from openai import OpenAI
 from vertexai.preview.language_models import TextGenerationModel
 
 
-def openai_caller(
-        relevant_doc_list: List[RelevantDoc],
-        question_string: str) -> str:
+class AICaller:
+    PromptType = TypeVar("PromptType")
+    def make_prompt(
+            self,
+            relevant_doc_list: List[RelevantDoc],
+            question_string: str) -> PromptType:
+        raise NotImplementedError()
 
-    client = OpenAI()
-    context_prefix = """
-Answer user's question according to the provided documents. Each \
-documents are seperated by a "---". If the provided documents are not \
-relevant to user's question, reply with an apology.
+    def send_request(self, prompt: PromptType) -> str:
+        raise NotImplementedError()
+
+
+class OpenAICaller(AICaller):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.client = OpenAI()
+        self.MODEL_NAME = 'gpt-3.5-turbo'
+
+    def make_prompt(
+            self,
+            relevant_doc_list: List[RelevantDoc],
+            question_string: str) -> List[dict]:
+        
+        context_prefix = """Answer user's question according to the provided \
+documents. Your answer should simple and straightforward. Each documents are \
+separated by "---". If the provided documents are not relevant to user's \
+question, reply with an apology.
 
 Here's the provided documents:
 """
-    doc_sep = '---\n'
+        doc_sep = '---\n'
 
-    context_string = (
-        context_prefix
-        + '\n'
-        + doc_sep.join(map(str, relevant_doc_list))
-    )
+        dummy_relevant_doc = RelevantDoc('n/a', 0, 'n/a')
+        if len(relevant_doc_list) == 0:
+            relevant_doc_list = [dummy_relevant_doc]
+        relevant_doc_list = [''] + relevant_doc_list + ['']
 
-    response = client.chat.completions.create(
-        model='gpt-3.5-turbo',
-        messages=[
+        context_string = (
+            context_prefix
+            + '\n'
+            + doc_sep.join(map(str, relevant_doc_list))
+        )
+
+        return [
             {
                 'role': 'system',
                 'content': context_string
@@ -38,57 +60,81 @@ Here's the provided documents:
                 'content': question_string
             }
         ]
-    )
-
-    response_text = response['choices'][0]['message']['content']
-
-    return response_text
-
-def vertexai_caller(
-        relevant_doc_list: List[RelevantDoc],
-        question_string: str) -> str:
     
-    context_prefix = """
-Answer user's question according to the provided documents. Each \
-documents are seperated by a "---". If the provided documents are not \
-relevant to user's question, reply with an apology.
+    def send_request(self, prompt: List[dict]) -> str:
+        response = self.client.chat.completions.create(
+            model=self.MODEL_NAME,
+            messages=prompt
+        )
+        response_text = response['choices'][0]['message']['content']
+        return response_text
+
+
+class VertexAICaller():
+    
+    def __init__(self, parameters: Union[dict, None] = None) -> None:
+        super().__init__()
+        self.MODEL_NAME = 'text-bison@001'
+        if parameters is None:
+            self.parameters = {
+                "temperature": 0.2,
+                "max_output_tokens": 100,
+                "top_p": 0.8,
+                "top_k": 50
+            }
+        else:
+            self.parameters = parameters
+    
+    def make_prompt(
+            self,
+            relevant_doc_list: List[RelevantDoc],
+            question_string: str) -> str:
+
+        context_prefix = """Answer user's question according to the provided \
+documents. Your answer should simple and straightforward. Each documents are \
+separated by "---". If the provided documents are not relevant to user's \
+question, reply with an apology.
 
 Here's the provided documents:
 """
+        question_prefix = "\nUSER:"
+        doc_sep = '---\n'
 
-    question_prefix = "Here's the user's question:"
+        dummy_relevant_doc = RelevantDoc('n/a', 0, 'n/a')
+        if len(relevant_doc_list) == 0:
+            relevant_doc_list = [dummy_relevant_doc]
+        relevant_doc_list = [''] + relevant_doc_list + ['']
 
-    doc_sep = '---\n'
+        prompt_list = [
+            context_prefix,
+            doc_sep.join(map(str, relevant_doc_list)),
+            question_prefix,
+            question_string
+        ]
+        return '\n'.join(prompt_list)
 
-    dummy_relevant_doc = RelevantDoc('n/a', 0, 'n/a')
+    def send_request(
+            self,
+            prompt: str,
+            parameters: Union[dict, None] = None) -> str:
+        
+        model = TextGenerationModel.from_pretrained(self.MODEL_NAME)
+        response = model.predict(
+            prompt,
+            **parameters,
+        )
+        return response.text
 
-    if len(relevant_doc_list) == 0:
-        relevant_doc_list = [dummy_relevant_doc]
+    
+class DummyAICaller():
 
-    prompt_list = [
-        context_prefix,
-        doc_sep.join(map(str, relevant_doc_list)),
-        question_prefix,
-        question_string
-    ]
-    prompt_text = '\n'.join(prompt_list)
+    def make_prompt(
+            self,
+            relevant_doc_list: List[RelevantDoc],
+            question_string: str) -> None:
+        return None
 
-    parameters = {
-        "temperature": 0.2,
-        "max_output_tokens": 400,
-        "top_p": 0.8,
-        "top_k": 50
-    }
-    model = TextGenerationModel.from_pretrained('text-bison@001')
-    response = model.predict(
-        prompt_text,
-        **parameters,
-    )
-    return response.text
-
-def dummy_ai_caller(
-        relevant_doc_list: List[RelevantDoc],
-        question_string: str) -> str:
-    return 'As an AI assistant, I cannot answer this question.'
-
-ai_caller: Callable[[str], str] = dummy_ai_caller
+    def send_request(
+            self,
+            prompt: None = None):
+        return 'As an AI assistant, I cannot answer this question.'

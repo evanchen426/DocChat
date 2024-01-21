@@ -54,7 +54,7 @@ if __name__ == '__main__':
     try:
         response_string = ask_module(
             args.question_string,
-            ai_backend=args.ai_backend
+            ai_backend=args.ai_backend,
             is_debug=args.debug
         )
 

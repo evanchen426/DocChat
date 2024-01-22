@@ -14,6 +14,7 @@ from whoosh.analysis import (
 
 from .relevant_doc import RelevantDoc
 
+DOCDATABASE_DIR = './database'
 
 class DocDatabase:
 
@@ -39,11 +40,9 @@ class DocDatabase:
 
 class DocDatabaseWhoosh(DocDatabase):
 
-    def __init__(self, storage_dir='./database', topk=1):
+    def __init__(self, storage_dir):
         super().__init__()
         self.STORAGE_DIR = storage_dir
-
-        self.SEARCH_TOP_K = topk
 
         # self.MY_SCORE_FUNC = TF_IDF()
         self.MY_SCORE_FUNC = BM25F()
@@ -96,7 +95,7 @@ class DocDatabaseWhoosh(DocDatabase):
                 sleep(0.01)
         raise LockError()
 
-    def search(self, query: str) -> List[RelevantDoc]:
+    def search(self, query: str, topk: int = 2) -> List[RelevantDoc]:
         assert os.path.exists(self.STORAGE_DIR)
         storage = open_dir(self.STORAGE_DIR)
 

@@ -45,9 +45,15 @@ export const AskSlashCommand: SlashCommand = {
       respMsg += data.toString();
     });
 
+    // discord's request body length limit is 2000
+    const discordContentLengthLimit = 1600;
     pythonExec.on('close', (code) => {
       if (code != 0) {
         respMsg = 'Error getting response';
+      }
+      if (respMsg.length > discordContentLengthLimit) {
+        respMsg = respMsg.substring(0, discordContentLengthLimit)
+           + '[truncated for reply length limit]';
       }
       interaction.reply(respMsg);
     });

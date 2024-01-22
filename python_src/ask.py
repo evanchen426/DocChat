@@ -1,21 +1,26 @@
-from argparse import ArgumentParser
 import os
+import json
+from argparse import ArgumentParser
+from typing import Union
 
-from utils.database import DocDatabaseWhoosh
+from utils.database import DOCDATABASE_DIR, DocDatabaseWhoosh
 # from utils.relevant_doc import RelevantDoc
 from utils.ai_caller import VertexAICaller, OpenAICaller, DummyAICaller
 
-# discord's body length limit is 2000
-MAX_OUTPUT_LENGTH = 1800
-
+CONTEXT_RECORD_DIR = './context_record'
 
 def ask_module(
         question_string: str,
+        search_topk: int,
         ai_backend: str,
+        channel_id: Union[str, None],
         is_debug: bool = False) -> str:
-    """Handle higher-level logic"""
-    database = DocDatabaseWhoosh()
-    relevant_doc_list = database.search(question_string)
+    """Handle higher-level logic of getting AI's reply"""
+    database = DocDatabaseWhoosh(DOCDATABASE_DIR)
+    relevant_doc_list = database.search(
+        question_string,
+        search_topk
+    )
     if is_debug:
         print('---\n'.join(
             map(str, relevant_doc_list)
@@ -28,10 +33,29 @@ def ask_module(
     elif ai_backend == 'vertexai':
         ai_caller = VertexAICaller()
 
-    prompt = ai_caller.make_prompt(relevant_doc_list, question_string)
-    response_string = ai_caller.send_request(prompt)
+    if channel_id is None:
+        context = ai_caller.make_context(relevant_doc_list)
+        resp_context, resp_string = ai_caller.send_request(
+            context,
+            question_string
+        )
 
-    return response_string
+    else:
+        context_record_path = os.path.join(CONTEXT_RECORD_DIR, channel_id)
+        if os.path.exists(context_record_path):
+            with open(context_record_path, 'r') as f:
+                context = json.load(f)
+        else:
+            context = ai_caller.make_context(relevant_doc_list)
+        resp_context, resp_string = ai_caller.send_request(
+            context,
+            question_string
+        )
+        context += resp_context
+        with open(context_record_path, 'r') as f:
+            json.dump(context, context_record_path)
+
+    return resp_string
 
 if __name__ == '__main__':
     parser = ArgumentParser()
@@ -40,29 +64,29 @@ if __name__ == '__main__':
         type=str
     )
     parser.add_argument(
+        '--search-topk',
+        type=int,
+        default=2
+    )
+    parser.add_argument(
         '--ai-backend',
         type=str,
         choices=['dummy', 'vertexai', 'openai'],
         default='vertexai'
     )
     parser.add_argument(
+        '--channel-id',
+        type=int,
+        default=None
+    )
+    parser.add_argument(
         '--debug',
         action='store_true'
     )
     args = parser.parse_args()
-    question_string = args.question_string
-    is_debug = args.debug
     try:
-        response_string = ask_module(
-            args.question_string,
-            ai_backend=args.ai_backend,
-            is_debug=args.debug
-        )
-
-        if len(response_string) > MAX_OUTPUT_LENGTH:
-            response_string = response_string[:MAX_OUTPUT_LENGTH]
-            response_string += '[truncated because of reply length limit]'
-        print(response_string)
+        resp_string = ask_module(**args)
+        print(resp_string)
     except Exception as e:
         print(repr(e))
         raise e

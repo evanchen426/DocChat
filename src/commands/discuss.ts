@@ -31,7 +31,7 @@ export const DiscussSlashCommand: SlashCommand = {
     console.log(
       `User ${interaction.user.username} `
       + `in channel ${channel_id} `
-      + `ask "${question}"`
+      + `asks "${question} in discussion"`
     )
 
     let respMsg = '';

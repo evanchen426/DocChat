@@ -75,8 +75,8 @@ if __name__ == '__main__':
         '--ai-backend',
         type=str,
         choices=['dummy', 'vertexai', 'openai'],
-        # default='vertexai'
-        default='dummy'
+        default='vertexai'
+        # default='dummy'
     )
     parser.add_argument(
         '--channel-id',

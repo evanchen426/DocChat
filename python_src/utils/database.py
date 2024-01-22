@@ -27,8 +27,7 @@ class DocDatabase:
     def add_batch(self, _iterable: Iterable[Dict]) -> None:
         raise NotImplementedError()
 
-
-    def update(self, old_kwargs: Dict, new_kwargs: Dict) -> None:
+    def get_all(self, fieldnames) -> List[dict]:
         raise NotImplementedError()
 
     def delete(self, filename: str) -> None:
@@ -94,6 +93,19 @@ class DocDatabaseWhoosh(DocDatabase):
             except LockError:
                 sleep(0.01)
         raise LockError()
+    
+    def get_all(self, fieldnames) -> List[dict]:
+        """get all documents with fields in `fieldnames`"""
+        assert len(fieldnames) != 0
+        assert os.path.exists(self.STORAGE_DIR)
+        storage = open_dir(self.STORAGE_DIR)
+        reader = storage.reader()
+        all_items: List[dict] = list(reader.all_stored_fields())
+        filtered_fieldnames = [
+            {item[field] for field in fieldnames}
+            for item in all_items
+        ]
+        return filtered_fieldnames
 
     def search(self, query: str, topk: int = 2) -> List[RelevantDoc]:
         assert os.path.exists(self.STORAGE_DIR)

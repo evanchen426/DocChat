@@ -7,6 +7,7 @@ import { spawn } from 'child_process'
 import { setBotListener } from './bot'
 import { AskSlashCommand } from './commands/ask'
 import { ClearSlashCommand } from './commands/clear'
+import { AskDummySlashCommand } from './commands/ask_dummy'
 import { DiscussSlashCommand } from './commands/discuss'
 import { NewChannelSlashCommand } from './commands/new_channel'
 import { deploySlashCommands } from './deploy'
@@ -16,6 +17,7 @@ import { AppConfig } from './types/config'
 // Register commands
 const commandList: Array<SlashCommand> = [
   AskSlashCommand,
+  AskDummySlashCommand,
   ClearSlashCommand,
   DiscussSlashCommand,
   NewChannelSlashCommand

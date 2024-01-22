@@ -3,9 +3,9 @@ import { spawn } from 'child_process'
 
 import { SlashCommand } from '../types/command'
 
-export const AskSlashCommand: SlashCommand = {
+export const AskDummySlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
-    .setName('ask')
+    .setName('askdummy')
     .setDescription('Ask me any question!')
     .addStringOption(option =>
       option.setName('question')

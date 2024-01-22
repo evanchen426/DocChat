@@ -113,7 +113,7 @@ class DocDatabaseWhoosh(DocDatabase):
         ]
         return filtered_fieldnames
 
-    def search(self, query: str, topk: int = 2, timelimit = 1.0) -> List[RelevantDoc]:
+    def search(self, query: str, topk: int = 2, timelimit = 0.1) -> List[RelevantDoc]:
         assert os.path.exists(self.STORAGE_DIR)
         findex = open_dir(self.STORAGE_DIR)
 
@@ -129,9 +129,10 @@ class DocDatabaseWhoosh(DocDatabase):
             collector = searcher.collector(limit=topk)
             tl_collector = TimeLimitCollector(collector, timelimit=timelimit)
             try:
-                results = searcher.search_with_collector(query, tl_collector)
+                searcher.search_with_collector(query, tl_collector)
             except TimeLimit:
-                results = []
+                pass
+            results = tl_collector.results()
             relevant_doc_list = [
                 RelevantDoc(res["title"], res.score, res["content"])
                 for res in results

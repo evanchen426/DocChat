@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 
 export const NewChannelSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
-    .setName('newchannel')
+    .setName('new_channel')
     .setDescription('Open new channel where there\'s just you and chatbot...'),
   async execute(interaction: CommandInteraction) {
     const new_channel_name = 'chatbot_'

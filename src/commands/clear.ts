@@ -5,8 +5,8 @@ import { SlashCommand } from '../types/command'
 
 export const ClearSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
-    .setName('clear')
-    .setDescription('Clear the discussion history in this channel.'),
+    .setName('new_discuss')
+    .setDescription('Start a new empty discussion in this channel.'),
   async execute(interaction: CommandInteraction) {
     let channel_id = interaction.channelId;
     let python_args = [

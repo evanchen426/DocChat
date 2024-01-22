@@ -5,7 +5,7 @@ import { SlashCommand } from '../types/command'
 
 export const AskDummySlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
-    .setName('askdummy')
+    .setName('ask_dummy')
     .setDescription('Ask me any question!')
     .addStringOption(option =>
       option.setName('question')

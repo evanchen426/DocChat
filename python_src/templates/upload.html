@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-blue-200 flex justify-center items-center h-screen">
+  <div class="bg-white p-10 rounded-lg shadow-lg">
+    <form action="upload" method="post" enctype="multipart/form-data">
+      <input type="file" id="fileInput" name='file[]' multiple="" onchange="this.form.submit()">
+    </form>
+    <button id="listFilesBtn" class="bg-green-500 text-white px-4 py-2 rounded shadow mt-4"
+    onclick="window.location.href='/list_files'">List Files</button>
+  </div>
+</body>
+</html>

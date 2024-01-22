@@ -9,7 +9,7 @@ from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, ID, TEXT
 from whoosh.scoring import TF_IDF, BM25F
 from whoosh.analysis import (
-    RegexAnalyzer, StemmingAnalyzer, LowercaseFilter, StopFilter
+    RegexAnalyzer, LowercaseFilter, StopFilter
 )
 
 from .relevant_doc import RelevantDoc
@@ -41,8 +41,8 @@ class DocDatabaseWhoosh(DocDatabase):
         super().__init__()
         self.STORAGE_DIR = storage_dir
 
-        # self.MY_SCORE_FUNC = TF_IDF()
-        self.MY_SCORE_FUNC = BM25F()
+        self.MY_SCORE_FUNC = TF_IDF()
+        # self.MY_SCORE_FUNC = BM25F()
 
         self.MY_ANALYZER = (
             RegexAnalyzer()

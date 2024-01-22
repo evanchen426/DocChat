@@ -1,8 +1,6 @@
-import os
 from typing import List, Union, TypeVar, Tuple
 
-from .relevant_doc import RelevantDoc 
-from openai import OpenAI
+from .relevant_doc import RelevantDoc
 from vertexai.preview.language_models import TextGenerationModel
 
 
@@ -20,60 +18,60 @@ class AICaller:
         raise NotImplementedError()
 
 
-class OpenAICaller(AICaller):
+# class OpenAICaller(AICaller):
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.client = OpenAI()
-        self.MODEL_NAME = 'gpt-3.5-turbo'
+#     def __init__(self) -> None:
+#         super().__init__()
+#         self.client = OpenAI()
+#         self.MODEL_NAME = 'gpt-3.5-turbo'
 
-    def make_context(
-            self,
-            relevant_doc_list: List[RelevantDoc]) -> List[dict]:
-        context_prefix = """Answer user's question according to the provided \
-documents. Your answer should simple and straightforward. Each documents are \
-separated by "---". If the provided documents are empty or not relevant to \
-user's question, reply with an apology.
+#     def make_context(
+#             self,
+#             relevant_doc_list: List[RelevantDoc]) -> List[dict]:
+#         context_prefix = """Answer user's question according to the provided \
+# documents. Your answer should simple and straightforward. Each documents are \
+# separated by "---". If the provided documents are empty or not relevant to \
+# user's question, reply with an apology.
 
-Here's the provided documents:
-"""
-        doc_sep = '---\n'
+# Here's the provided documents:
+# """
+#         doc_sep = '---\n'
 
-        dummy_relevant_doc = RelevantDoc('n/a', 0, 'n/a')
-        if len(relevant_doc_list) == 0:
-            relevant_doc_list = [dummy_relevant_doc]
-        relevant_doc_list = [''] + relevant_doc_list + ['']
+#         dummy_relevant_doc = RelevantDoc('n/a', 0, 'n/a')
+#         if len(relevant_doc_list) == 0:
+#             relevant_doc_list = [dummy_relevant_doc]
+#         relevant_doc_list = [''] + relevant_doc_list + ['']
 
-        context_string = (
-            context_prefix
-            + '\n'
-            + doc_sep.join(map(str, relevant_doc_list))
-        )
+#         context_string = (
+#             context_prefix
+#             + '\n'
+#             + doc_sep.join(map(str, relevant_doc_list))
+#         )
 
-        return [{
-            'role': 'system',
-            'content': context_string
-        }]
+#         return [{
+#             'role': 'system',
+#             'content': context_string
+#         }]
     
-    def send_request(
-            self,
-            context: List[dict],
-            question_string: str) -> Tuple[List[dict], str]:
-        messages = context + [{
-            'role': 'user',
-            'content': question_string
-        }]
-        response = self.client.chat.completions.create(
-            model=self.MODEL_NAME,
-            messages=messages
-        )
-        return response['choices'][0]['content']
+#     def send_request(
+#             self,
+#             context: List[dict],
+#             question_string: str) -> Tuple[List[dict], str]:
+#         messages = context + [{
+#             'role': 'user',
+#             'content': question_string
+#         }]
+#         response = self.client.chat.completions.create(
+#             model=self.MODEL_NAME,
+#             messages=messages
+#         )
+#         return response['choices'][0]['content']
     
-    def contextify_ai_response(self, response_string) -> List[dict]:
-        return [{
-            'role': 'assistant',
-            'content': response_string
-        }]
+#     def contextify_ai_response(self, response_string) -> List[dict]:
+#         return [{
+#             'role': 'assistant',
+#             'content': response_string
+#         }]
 
 
 class VertexAICaller():

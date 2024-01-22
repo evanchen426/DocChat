@@ -113,7 +113,7 @@ class DocDatabaseWhoosh(DocDatabase):
         ]
         return filtered_fieldnames
 
-    def search(self, query: str, topk: int = 2, timelimit = 0.1) -> List[RelevantDoc]:
+    def search(self, query: str, topk: int = 2, timelimit = 5.0) -> List[RelevantDoc]:
         assert os.path.exists(self.STORAGE_DIR)
         findex = open_dir(self.STORAGE_DIR)
 

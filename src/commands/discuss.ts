@@ -18,6 +18,7 @@ export const DiscussSlashCommand: SlashCommand = {
       await interaction.reply('Error parsing question.');
       return;
     }
+    await interaction.reply('Searching...');
 
     let channel_id = interaction.channelId;
     let python_args = [
@@ -56,7 +57,7 @@ export const DiscussSlashCommand: SlashCommand = {
         respMsg = respMsg.substring(0, discordContentLengthLimit)
           + '[truncated for reply length limit]';
       }
-      interaction.reply(respMsg);
+      interaction.channel?.send(respMsg);
     });
   }
 }

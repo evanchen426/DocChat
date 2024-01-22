@@ -1,12 +1,12 @@
-import { CommandInteraction,SlashCommandBuilder } from 'discord.js'
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { spawn } from 'child_process'
 
 import { SlashCommand } from '../types/command'
 
-export const AskSlashCommand: SlashCommand = {
+export const DiscussSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
-    .setName('ask')
-    .setDescription('Ask me any question!')
+    .setName('discuss')
+    .setDescription('Ask question that keeps the discussion history.')
     .addStringOption(option =>
       option.setName('question')
         .setDescription('The question you wanna ask')
@@ -23,15 +23,15 @@ export const AskSlashCommand: SlashCommand = {
     let python_args = [
       '-u',
       './python_src/ask.py',
-      `${question}`
+      `${question}`,
+      '--channel-id', channel_id,
     ];
 
     console.log(
       `User ${interaction.user.username} `
       + `in channel ${channel_id} `
-      + `asks "${question}"`
+      + `ask "${question}"`
     )
-    await interaction.reply('Searching...');
 
     let respMsg = '';
   
@@ -56,7 +56,7 @@ export const AskSlashCommand: SlashCommand = {
         respMsg = respMsg.substring(0, discordContentLengthLimit)
           + '[truncated for reply length limit]';
       }
-      interaction.channel?.send(respMsg);
+      interaction.reply(respMsg);
     });
   }
 }

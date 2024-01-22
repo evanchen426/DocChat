@@ -8,20 +8,20 @@ from utils.database import DocDatabaseWhoosh
 # from utils.relevant_doc import RelevantDoc
 from utils.ai_caller import VertexAICaller, DummyAICaller
 
-CONTEXT_RECORD_DIR = './context_record'
-DOCDATABASE_DIR = './database'
+with open('storage_path_config.json', 'r') as f:
+    storage_paths = json.load(f)
+    context_record_dir = storage_paths['context_record_dir']
+    doc_database_dir = storage_paths['doc_database_dir']
 
 def ask_module(
         question_string: str,
         search_topk: int,
         ai_backend: str,
         channel_id: str,
-        bind_channel: bool,
         is_debug: bool = False) -> str:
     """Handle higher-level logic of getting AI's reply"""
-    database = DocDatabaseWhoosh(DOCDATABASE_DIR)
-    assert channel_id != ''
-
+    database = DocDatabaseWhoosh(doc_database_dir)
+    # sleep(3)
     relevant_doc_list = database.search(
         question_string,
         search_topk
@@ -33,15 +33,13 @@ def ask_module(
 
     if ai_backend == 'dummy':
         ai_caller = DummyAICaller()
-    elif ai_backend == 'openai':
-        ai_caller = OpenAICaller()
     elif ai_backend == 'vertexai':
         ai_caller = VertexAICaller()
 
-    context_record_path = os.path.join(CONTEXT_RECORD_DIR, channel_id)
-    context_record_exists = os.path.exists(context_record_path)
-    if bind_channel or context_record_exists:
-        os.makedirs(CONTEXT_RECORD_DIR, exist_ok=True)
+    if channel_id != '':
+        context_record_path = os.path.join(context_record_dir, channel_id)
+        context_record_exists = os.path.exists(context_record_path)
+        os.makedirs(context_record_dir, exist_ok=True)
         try:
             assert context_record_exists
             with open(context_record_path, 'r') as f:
@@ -77,17 +75,13 @@ if __name__ == '__main__':
         '--ai-backend',
         type=str,
         choices=['dummy', 'vertexai', 'openai'],
-        default='vertexai'
-        # default='dummy'
+        # default='vertexai'
+        default='dummy'
     )
     parser.add_argument(
         '--channel-id',
         type=str,
-        required=True
-    )
-    parser.add_argument(
-        '--bind-channel',
-        action='store_true'
+        default=''
     )
     parser.add_argument(
         '--is-debug',

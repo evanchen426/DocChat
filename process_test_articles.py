@@ -1,5 +1,4 @@
 import pandas as pd
-import os
 import re
 from python_src.utils.database import DocDatabaseWhoosh
 
@@ -10,6 +9,10 @@ row_num, col_num = data.shape
 doc_database = DocDatabaseWhoosh('./database')
 
 doc_database.add_batch((
-    {'filename': id, 'title': row['title'], 'body': row['body']}
-    for id, row in data.iterrows()
+    {
+        'filename': str(id),
+        'title': row['title'],
+        'content': re.sub('\{\w+\}', '', re.sub('\n+', '\n', row['body']))
+    }
+    for id, row in data.head(100).iterrows()
 ))

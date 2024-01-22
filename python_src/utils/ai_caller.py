@@ -125,13 +125,21 @@ Here's the provided documents:
     
 class DummyAICaller():
 
-    def make_prompt(
+    def make_context(
             self,
-            relevant_doc_list: List[RelevantDoc],
-            question_string: str) -> None:
-        return None
+            relevant_doc_list: List[RelevantDoc]) -> int:
+        return 1
 
     def send_request(
             self,
-            prompt: None = None):
-        return 'As an AI assistant, I cannot answer this question.'
+            context: int,
+            question_string: str) -> str:
+        return (
+            'As an AI assistant, I cannot answer this question.'
+            if context <= 1 else
+            f'This is the {context} times I said this. '
+            f'As an AI assistant, I cannot answer this question.'
+        )
+    
+    def contextify_ai_response(self, response_string) -> int:
+        return 1

@@ -4,7 +4,9 @@ import { SlashCommand } from '../types/command'
 import { randomUUID } from 'crypto';
 
 export const NewChannelSlashCommand: SlashCommand = {
-  data: new SlashCommandBuilder().setName('newchannel').setDescription('Open new channel'),
+  data: new SlashCommandBuilder()
+    .setName('newchannel')
+    .setDescription('Open new channel where there\'s just you and chatbot...'),
   async execute(interaction: CommandInteraction) {
     const new_channel_name = 'chatbot_'
                             + interaction.user.username

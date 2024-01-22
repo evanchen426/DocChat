@@ -11,6 +11,10 @@ export const AskSlashCommand: SlashCommand = {
       option.setName('question')
         .setDescription('The question you wanna ask')
         .setRequired(true)
+    ).addBooleanOption(option =>
+      option.setName('bindchannel')
+        .setDescription('Remembered this conversation. All Q&As in \
+this channel will share the same context. FOREVER.')
     ),
   async execute(interaction: CommandInteraction) {
     let question = interaction.options.get('question')?.value?.toString();
@@ -19,22 +23,28 @@ export const AskSlashCommand: SlashCommand = {
       return;
     }
 
-    // logging
+    const is_bind_channel = interaction.options.get('bindchannel', false)?.value;
+    let channel_id = interaction.channelId;
+    let python_args = [
+      '-u',
+      './python_src/ask.py',
+      `${question}`,
+      '--channel-id', channel_id,
+    ];
+    if (is_bind_channel == true) {
+      python_args = python_args.concat(['--bind-channel'], );
+    }
+
     console.log(
       `User ${interaction.user.username} `
-      + `in channel ${interaction.channelId.toString()} `
-      + `ask "${question}"`
+      + `in channel ${channel_id} `
+      + `ask "${question}" `
+      + `is_bind_channel=${is_bind_channel}`
     )
 
     let respMsg = '';
-    const pythonExec = await spawn(
-      'python3',
-      [
-        '-u',
-        './python_src/ask.py',
-        `${question}`
-      ]
-    );
+  
+    const pythonExec = await spawn('python3', python_args);
 
     pythonExec.on('error', (err) => {
       interaction.reply('Error starting ask module.');
@@ -53,10 +63,9 @@ export const AskSlashCommand: SlashCommand = {
       }
       if (respMsg.length > discordContentLengthLimit) {
         respMsg = respMsg.substring(0, discordContentLengthLimit)
-           + '[truncated for reply length limit]';
+          + '[truncated for reply length limit]';
       }
       interaction.reply(respMsg);
     });
-    
   }
 }

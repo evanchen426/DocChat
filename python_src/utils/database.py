@@ -14,8 +14,6 @@ from whoosh.analysis import (
 
 from .relevant_doc import RelevantDoc
 
-DOCDATABASE_DIR = './database'
-
 class DocDatabase:
 
     def __init__(self):

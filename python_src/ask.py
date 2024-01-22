@@ -4,11 +4,12 @@ from json.decoder import JSONDecodeError
 from traceback import format_exc
 from argparse import ArgumentParser
 
-from utils.database import DOCDATABASE_DIR, DocDatabaseWhoosh
+from utils.database import DocDatabaseWhoosh
 # from utils.relevant_doc import RelevantDoc
 from utils.ai_caller import VertexAICaller, OpenAICaller, DummyAICaller
 
 CONTEXT_RECORD_DIR = './context_record'
+DOCDATABASE_DIR = './database'
 
 def ask_module(
         question_string: str,
@@ -76,8 +77,8 @@ if __name__ == '__main__':
         '--ai-backend',
         type=str,
         choices=['dummy', 'vertexai', 'openai'],
-        # default='vertexai'
-        default='dummy'
+        default='vertexai'
+        # default='dummy'
     )
     parser.add_argument(
         '--channel-id',

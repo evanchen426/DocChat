@@ -69,7 +69,7 @@ Here's the provided documents:
         )
         return response['choices'][0]['content']
     
-    def contextify_ai_response(response_string) -> List[dict]:
+    def contextify_ai_response(self, response_string) -> List[dict]:
         return [{
             'role': 'assistant',
             'content': response_string
@@ -120,7 +120,7 @@ Here's the provided documents:
         )
         return response.text
 
-    def contextify_ai_response(response_string) -> str:
+    def contextify_ai_response(self, response_string) -> str:
         return f'\nAI: {response_string}'
     
 class DummyAICaller():

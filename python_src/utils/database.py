@@ -131,7 +131,7 @@ class DocDatabaseWhoosh(DocDatabase):
             try:
                 results = searcher.search_with_collector(query, tl_collector)
             except TimeLimit:
-                results = tl_collector.results()
+                results = []
             relevant_doc_list = [
                 RelevantDoc(res["title"], res.score, res["content"])
                 for res in results

@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 from utils.database import DocDatabaseWhoosh
 # from utils.relevant_doc import RelevantDoc
-from utils.ai_caller import VertexAICaller, OpenAICaller, DummyAICaller
+from utils.ai_caller import VertexAICaller, DummyAICaller
 
 CONTEXT_RECORD_DIR = './context_record'
 DOCDATABASE_DIR = './database'

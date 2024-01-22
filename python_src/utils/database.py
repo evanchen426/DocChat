@@ -3,6 +3,7 @@ import os
 from time import sleep
 from typing import List, Iterable, Dict
 
+from whoosh.collectors import TimeLimitCollector, TimeLimit
 from whoosh.qparser import QueryParser
 from whoosh.writing import LockError
 from whoosh.index import create_in, open_dir
@@ -112,7 +113,7 @@ class DocDatabaseWhoosh(DocDatabase):
         ]
         return filtered_fieldnames
 
-    def search(self, query: str, topk: int = 2) -> List[RelevantDoc]:
+    def search(self, query: str, topk: int = 2, timelimit = 1.0) -> List[RelevantDoc]:
         assert os.path.exists(self.STORAGE_DIR)
         findex = open_dir(self.STORAGE_DIR)
 
@@ -125,7 +126,12 @@ class DocDatabaseWhoosh(DocDatabase):
         with findex.searcher(weighting=self.MY_SCORE_FUNC) as searcher:
             parser = QueryParser('content', findex.schema)
             query = parser.parse(query)
-            results = searcher.search(query, limit=topk)
+            collector = searcher.collector(limit=topk)
+            tl_collector = TimeLimitCollector(collector, timelimit=timelimit)
+            try:
+                results = searcher.search_with_collector(query, tl_collector)
+            except TimeLimit:
+                results = tl_collector.results()
             relevant_doc_list = [
                 RelevantDoc(res["title"], res.score, res["content"])
                 for res in results

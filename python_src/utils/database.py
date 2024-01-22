@@ -42,8 +42,8 @@ class DocDatabaseWhoosh(DocDatabase):
         super().__init__()
         self.STORAGE_DIR = storage_dir
 
-        self.MY_SCORE_FUNC = TF_IDF()
-        # self.MY_SCORE_FUNC = BM25F()
+        # self.MY_SCORE_FUNC = TF_IDF()
+        self.MY_SCORE_FUNC = BM25F()
 
         self.MY_ANALYZER = (
             RegexAnalyzer()

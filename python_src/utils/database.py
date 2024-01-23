@@ -1,7 +1,7 @@
 
 import os
 from time import sleep
-from typing import List, Iterable, Dict
+from typing import List, Iterable, Dict, Union
 
 from whoosh.collectors import TimeLimitCollector, TimeLimit
 from whoosh.qparser import QueryParser
@@ -18,7 +18,7 @@ from .relevant_doc import RelevantDoc
 class DocDatabase:
 
     def __init__(self):
-        self.COLUMN_NAMES = ('filename', 'title', 'content')
+        self.COLUMN_NAMES = ('filename', 'content')
 
     def add(self, **kwargs) -> None:
         raise NotImplementedError()
@@ -52,8 +52,7 @@ class DocDatabaseWhoosh(DocDatabase):
         )
 
         self.MY_SCHEMA = Schema(
-            filename=ID(),
-            title=TEXT(stored=True),
+            filename=ID(stored=True),
             content=TEXT(
                 stored=True,
                 sortable=True,
@@ -100,41 +99,40 @@ class DocDatabaseWhoosh(DocDatabase):
                 sleep(0.01)
         raise LockError()
     
-    def get_all(self, fieldnames) -> List[dict]:
+    def get_all(self) -> List[dict]:
         """get all documents with fields in `fieldnames`"""
-        assert len(fieldnames) != 0
         assert os.path.exists(self.STORAGE_DIR)
         findex = open_dir(self.STORAGE_DIR)
         reader = findex.reader()
         all_items: List[dict] = list(reader.all_stored_fields())
-        filtered_fieldnames = [
-            {item[field] for field in fieldnames}
-            for item in all_items
-        ]
-        return filtered_fieldnames
+        return all_items
 
-    def search(self, query: str, topk: int = 2, timelimit = 3.0) -> List[RelevantDoc]:
+    def search(
+            self,
+            query: str,
+            fieldname:str = 'content',
+            topk: int = 2,
+            timelimit: Union[float ,None] = None) -> List[RelevantDoc]:
         assert os.path.exists(self.STORAGE_DIR)
         findex = open_dir(self.STORAGE_DIR)
 
-        # process texts
-        query = ' '.join([
-            token.text
-            for token in self.MY_ANALYZER(query)
-        ])
-
         with findex.searcher(weighting=self.MY_SCORE_FUNC) as searcher:
-            parser = QueryParser('content', findex.schema)
+            parser = QueryParser(fieldname, findex.schema)
             query = parser.parse(query)
             collector = searcher.collector(limit=topk)
-            tl_collector = TimeLimitCollector(collector, timelimit=timelimit)
+            if timelimit is not None:
+                collector = TimeLimitCollector(
+                    collector,
+                    timelimit=timelimit
+                )
             try:
-                searcher.search_with_collector(query, tl_collector)
+                searcher.search_with_collector(query, collector)
             except TimeLimit:
                 pass
-            results = tl_collector.results()
+            results = collector.results()
+
             relevant_doc_list = [
-                RelevantDoc(res["title"], res.score, res["content"])
+                RelevantDoc(res["filename"], res.score, res["content"])
                 for res in results
             ]
         return relevant_doc_list

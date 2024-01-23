@@ -1,22 +1,36 @@
 import pandas as pd
 import re
+import json
 import os
 import shutil
 from python_src.utils.database import DocDatabaseWhoosh
 
-data = pd.read_csv('articles.csv', )
+data = pd.read_csv('data/articles.csv', )
 data = data.astype(str)
 row_num, col_num = data.shape
 
-if os.path.exists('./database'):
-    shutil.rmtree('./database')
-doc_database = DocDatabaseWhoosh('./database')
+with open('./storage_path_config.json') as f:
+    storage_paths = json.load(f)
+doc_database_dir = storage_paths['doc_database_dir']
+original_doc_files_dir = storage_paths['original_doc_files_dir']
 
-doc_database.add_batch((
+if os.path.exists(original_doc_files_dir):
+    shutil.rmtree(original_doc_files_dir)
+os.makedirs(original_doc_files_dir, exist_ok=True)
+
+if os.path.exists(doc_database_dir):
+    shutil.rmtree(doc_database_dir)
+doc_database = DocDatabaseWhoosh(doc_database_dir)
+
+all_files = [
     {
-        'filename': str(id),
-        'title': row['title'],
+        'filename': row['title'] + '.txt',
         'content': re.sub(r'\{.+\}', '', re.sub(r'\n+', '\n', row['body']))
     }
     for id, row in data.iterrows()
-))
+]
+doc_database.add_batch(all_files)
+for file in all_files:
+    filepath = os.path.join(original_doc_files_dir, file['filename'])
+    with open(filepath, 'w+') as f:
+        f.write(file['content'])

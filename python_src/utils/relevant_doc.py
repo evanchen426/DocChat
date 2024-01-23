@@ -1,16 +1,16 @@
 class RelevantDoc:
-    title: str
+    filename: str
     relevant_score: float
-    body: str
+    content: str
 
-    def __init__(self, title: str, relevant_score: float, body: str):
-        self.title = title
+    def __init__(self, filename: str, relevant_score: float, content: str):
+        self.filename = filename
         self.relevant_score = relevant_score
-        self.body = body
+        self.content = content
 
     def __str__(self):
         return (
-            f'Title: {self.title}\n'
+            f'File: "{self.title}"\n'
             f'Relevant score: {self.relevant_score}\n'
-            f'Body: {self.body}\n'
+            f'Content: {self.body}\n'
         )

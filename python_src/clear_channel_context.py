@@ -13,7 +13,7 @@ if __name__ == '__main__':
     try:
         with open('storage_path_config.json', 'r') as f:
             storage_paths = json.load(f)
-        context_record_dir = storage_paths['context_record_dir']
+        context_record_dir = storage_paths['context_records_dir']
         if os.path.exists(context_record_dir):
             channel_context_record = os.path.join(
                 context_record_dir,

@@ -10,7 +10,7 @@ from utils.ai_caller import VertexAICaller, DummyAICaller
 
 with open('storage_path_config.json', 'r') as f:
     storage_paths = json.load(f)
-    context_record_dir = storage_paths['context_record_dir']
+    context_record_dir = storage_paths['context_records_dir']
     doc_database_dir = storage_paths['doc_database_dir']
 
 def ask_module(

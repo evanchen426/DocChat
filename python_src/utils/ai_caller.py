@@ -5,74 +5,20 @@ from vertexai.preview.language_models import TextGenerationModel
 
 
 class AICaller:
-    ContextType = TypeVar('ContextType')
-    def make_context(
+    PromptType = TypeVar('PromptType')
+    def promptify_relevant_docs(
             self,
-            relevant_doc_list: List[RelevantDoc]) -> ContextType:
+            relevant_doc_list: List[RelevantDoc]) -> PromptType:
         raise NotImplementedError()
 
-    def send_request(
-            self,
-            context: ContextType,
-            question_string: str) -> Tuple[str, ContextType]:
+    def promptify_question(question_string: str) -> PromptType:
+        raise NotImplementedError()
+    
+    def promptify_response(response_string_string: str) -> PromptType:
         raise NotImplementedError()
 
-
-# class OpenAICaller(AICaller):
-
-#     def __init__(self) -> None:
-#         super().__init__()
-#         self.client = OpenAI()
-#         self.MODEL_NAME = 'gpt-3.5-turbo'
-
-#     def make_context(
-#             self,
-#             relevant_doc_list: List[RelevantDoc]) -> List[dict]:
-#         context_prefix = """Answer user's question according to the provided \
-# documents. Your answer should simple and straightforward. Each documents are \
-# separated by "---". If the provided documents are empty or not relevant to \
-# user's question, reply with an apology stating that the no provided documents \
-# answers the users question.
-
-# Here's the provided documents:
-# """
-#         doc_sep = '---\n'
-
-#         dummy_relevant_doc = RelevantDoc('n/a', 0, 'n/a')
-#         if len(relevant_doc_list) == 0:
-#             relevant_doc_list = [dummy_relevant_doc]
-#         relevant_doc_list = [''] + relevant_doc_list + ['']
-
-#         context_string = (
-#             context_prefix
-#             + '\n'
-#             + doc_sep.join(map(str, relevant_doc_list))
-#         )
-
-#         return [{
-#             'role': 'system',
-#             'content': context_string
-#         }]
-    
-#     def send_request(
-#             self,
-#             context: List[dict],
-#             question_string: str) -> Tuple[List[dict], str]:
-#         messages = context + [{
-#             'role': 'user',
-#             'content': question_string
-#         }]
-#         response = self.client.chat.completions.create(
-#             model=self.MODEL_NAME,
-#             messages=messages
-#         )
-#         return response['choices'][0]['content']
-    
-#     def contextify_ai_response(self, response_string) -> List[dict]:
-#         return [{
-#             'role': 'assistant',
-#             'content': response_string
-#         }]
+    def send_request(self, prompt: PromptType) -> str:
+        raise NotImplementedError()
 
 
 class VertexAICaller():
@@ -90,7 +36,7 @@ class VertexAICaller():
         else:
             self.PARAMETERS = parameters
     
-    def make_context(self, relevant_doc_list: List[RelevantDoc]) -> str:
+    def promptify_relevant_docs(self, relevant_doc_list: List[RelevantDoc]) -> str:
         context_prefix = """Answer user's question according to the provided \
 documents. Your answer should simple and straightforward. Each documents are \
 separated by "---". If the provided documents are empty or not relevant to \
@@ -112,34 +58,38 @@ Here's the provided documents:
         ]
         return '\n'.join(prompt_list)
 
-    def send_request(self, context: str, question_string: str) -> str:
+    def promptify_question(self, question_string: str) -> str:
+        return f'\nUSER: {question_string}'
+
+    def promptify_response(self, response_string: str) -> str:
+        return f'\nAI: {response_string}'
+
+    def send_request(self, prompt: str) -> str:
         model = TextGenerationModel.from_pretrained(self.MODEL_NAME)
         response = model.predict(
-            f'{context}\nUSER: {question_string}',
+            prompt,
             **self.PARAMETERS,
         )
         return response.text
-
-    def contextify_ai_response(self, response_string) -> str:
-        return f'\nAI: {response_string}'
     
 class DummyAICaller():
 
-    def make_context(
+    def promptify_relevant_docs(
             self,
-            relevant_doc_list: List[RelevantDoc]) -> int:
-        return 1
+            relevant_doc_list: List[RelevantDoc]) -> str:
+        return 'relevant_docs\n'
 
-    def send_request(
-            self,
-            context: int,
-            question_string: str) -> str:
+    def promptify_question(self, question_string: str) -> str:
+        return question_string + '\n'
+
+    def promptify_response(self, response_string: str) -> str:
+        return response_string + '\n'
+
+    def send_request(self, prompt: str) -> str:
+        response_count = prompt.count('As an AI assistant')
         return (
             'As an AI assistant, I cannot answer this question.'
-            if context <= 1 else
-            f'This is the {context} times I said this. '
+            if response_count == 0 else
+            f'This is the {response_count} times I said this. '
             f'As an AI assistant, I cannot answer this question.'
         )
-    
-    def contextify_ai_response(self, response_string) -> int:
-        return 1

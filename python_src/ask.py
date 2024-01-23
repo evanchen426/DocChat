@@ -20,17 +20,6 @@ def ask_module(
         channel_id: str,
         is_debug: bool = False) -> str:
     """Handle higher-level logic of getting AI's reply"""
-    database = DocDatabaseWhoosh(doc_database_dir)
-    # sleep(3)
-    relevant_doc_list = database.search(
-        question_string,
-        search_topk
-    )
-    if is_debug:
-        print('---\n'.join(
-            map(str, relevant_doc_list)
-        ))
-
     if ai_backend == 'dummy':
         ai_caller = DummyAICaller()
     elif ai_backend == 'vertexai':
@@ -45,20 +34,42 @@ def ask_module(
             with open(context_record_path, 'r') as f:
                 context = json.load(f)
         except (AssertionError, JSONDecodeError):
-            context = ai_caller.make_context(relevant_doc_list)
+            database = DocDatabaseWhoosh(doc_database_dir)
+            relevant_doc_list = database.search(
+                question_string,
+                search_topk
+            )
+            context = ai_caller.promptify_relevant_docs(
+                relevant_doc_list
+            )
 
-        resp_string = ai_caller.send_request(context, question_string)
-        resp_context = ai_caller.contextify_ai_response(resp_string)
-        context += resp_context
+        if is_debug:
+            print(context + question_prompt)
+
+        question_prompt = ai_caller.promptify_question(question_string)
+        response_string = ai_caller.send_request(context + question_prompt)
+        response_prompt = ai_caller.promptify_response(response_string)
+        new_context = context + question_prompt + response_prompt
         with open(context_record_path, 'w+') as f:
-            json.dump(context, f)
+            json.dump(new_context, f)
 
     else:
-        context = ai_caller.make_context(relevant_doc_list)
-        resp_string = ai_caller.send_request(context, question_string)
-        
+        database = DocDatabaseWhoosh(doc_database_dir)
+        relevant_doc_list = database.search(
+            question_string,
+            search_topk
+        )
+        relevent_docs_prompt = ai_caller.promptify_relevant_docs(
+            relevant_doc_list
+        )
+        if is_debug:
+            print(relevent_docs_prompt + question_prompt)
+        question_prompt = ai_caller.promptify_question(question_string)
+        response_string = ai_caller.send_request(
+            relevent_docs_prompt + question_prompt
+        )
 
-    return resp_string
+    return response_string
 
 if __name__ == '__main__':
     parser = ArgumentParser()

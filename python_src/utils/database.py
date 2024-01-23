@@ -112,13 +112,15 @@ class DocDatabaseWhoosh(DocDatabase):
     def search(
             self,
             query: str,
-            fieldname:str = 'content',
+            fieldname :str = 'content',
             topk: int = 2,
-            timelimit: Union[float ,None] = None) -> List[RelevantDoc]:
+            timelimit: Union[float, None] = 3.0) -> List[RelevantDoc]:
         findex = self.get_indexer()
-        with findex.searcher(weighting=self.MY_SCORE_FUNC) as searcher:
-            parser = QueryParser(fieldname, findex.schema)
-            query = parser.parse(query)
+        parser = QueryParser(fieldname, findex.schema)
+        query = parser.parse(query)
+        relevant_doc_list = []
+        with findex.searcher() as searcher:
+            # results = searcher.search(query, limit=topk)
             collector = searcher.collector(limit=topk)
             if timelimit is not None:
                 collector = TimeLimitCollector(
@@ -130,7 +132,6 @@ class DocDatabaseWhoosh(DocDatabase):
             except TimeLimit:
                 pass
             results = collector.results()
-
             relevant_doc_list = [
                 RelevantDoc(res["filename"], res.score, res["content"])
                 for res in results

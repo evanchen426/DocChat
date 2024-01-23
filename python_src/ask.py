@@ -37,16 +37,15 @@ def ask_module(
             database = DocDatabaseWhoosh(doc_database_dir)
             relevant_doc_list = database.search(
                 question_string,
-                search_topk
+                topk=search_topk
             )
             context = ai_caller.promptify_relevant_docs(
                 relevant_doc_list
             )
 
+        question_prompt = ai_caller.promptify_question(question_string)
         if is_debug:
             print(context + question_prompt)
-
-        question_prompt = ai_caller.promptify_question(question_string)
         response_string = ai_caller.send_request(context + question_prompt)
         response_prompt = ai_caller.promptify_response(response_string)
         new_context = context + question_prompt + response_prompt
@@ -57,14 +56,14 @@ def ask_module(
         database = DocDatabaseWhoosh(doc_database_dir)
         relevant_doc_list = database.search(
             question_string,
-            search_topk
+            topk=search_topk
         )
         relevent_docs_prompt = ai_caller.promptify_relevant_docs(
             relevant_doc_list
         )
+        question_prompt = ai_caller.promptify_question(question_string)
         if is_debug:
             print(relevent_docs_prompt + question_prompt)
-        question_prompt = ai_caller.promptify_question(question_string)
         response_string = ai_caller.send_request(
             relevent_docs_prompt + question_prompt
         )

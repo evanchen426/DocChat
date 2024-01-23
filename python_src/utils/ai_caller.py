@@ -77,13 +77,15 @@ class DummyAICaller():
     def promptify_relevant_docs(
             self,
             relevant_doc_list: List[RelevantDoc]) -> str:
-        return 'relevant_docs\n'
+        return '\n'.join(
+            [d.filename for d in relevant_doc_list]
+        )
 
     def promptify_question(self, question_string: str) -> str:
-        return question_string + '\n'
+        return '\n' + question_string
 
     def promptify_response(self, response_string: str) -> str:
-        return response_string + '\n'
+        return '\n' + response_string
 
     def send_request(self, prompt: str) -> str:
         response_count = prompt.count('As an AI assistant')

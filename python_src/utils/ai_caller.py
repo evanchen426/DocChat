@@ -43,8 +43,7 @@ separated by "---". If the provided documents are empty or not relevant to \
 user's question, reply with an apology stating that the no provided documents \
 answers the users question.
 
-Here's the provided documents:
-"""
+Here's the provided documents:"""
         doc_sep = '---\n'
 
         dummy_relevant_doc = RelevantDoc('n/a', 0, 'n/a')
@@ -77,8 +76,8 @@ class DummyAICaller():
     def promptify_relevant_docs(
             self,
             relevant_doc_list: List[RelevantDoc]) -> str:
-        return '\n'.join(
-            [d.filename for d in relevant_doc_list]
+        return 'Relevant Docs:\n' + '\n'.join(
+            ['- ' + d.filename for d in relevant_doc_list]
         )
 
     def promptify_question(self, question_string: str) -> str:
@@ -92,6 +91,6 @@ class DummyAICaller():
         return (
             'As an AI assistant, I cannot answer this question.'
             if response_count == 0 else
-            f'This is the {response_count} times I said this. '
+            f'This is the {response_count + 1} times I said this. '
             f'As an AI assistant, I cannot answer this question.'
         )

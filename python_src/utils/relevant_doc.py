@@ -10,7 +10,7 @@ class RelevantDoc:
 
     def __str__(self):
         return (
-            f'File: "{self.title}"\n'
+            f'Document name: "{self.filename}"\n'
             f'Relevant score: {self.relevant_score}\n'
-            f'Content: {self.body}\n'
+            f'Content: {self.content}\n'
         )

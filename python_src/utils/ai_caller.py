@@ -31,7 +31,8 @@ class AICaller:
 #         context_prefix = """Answer user's question according to the provided \
 # documents. Your answer should simple and straightforward. Each documents are \
 # separated by "---". If the provided documents are empty or not relevant to \
-# user's question, reply with an apology.
+# user's question, reply with an apology stating that the no provided documents \
+# answers the users question.
 
 # Here's the provided documents:
 # """
@@ -93,7 +94,8 @@ class VertexAICaller():
         context_prefix = """Answer user's question according to the provided \
 documents. Your answer should simple and straightforward. Each documents are \
 separated by "---". If the provided documents are empty or not relevant to \
-user's question, reply with an apology.
+user's question, reply with an apology stating that the no provided documents \
+answers the users question.
 
 Here's the provided documents:
 """

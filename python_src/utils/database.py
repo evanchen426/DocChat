@@ -6,7 +6,7 @@ from typing import List, Iterable, Dict, Union
 from whoosh.collectors import TimeLimitCollector, TimeLimit
 from whoosh.qparser import QueryParser
 from whoosh.writing import LockError
-from whoosh.index import create_in, open_dir
+from whoosh.index import create_in, open_dir, EmptyIndexError
 from whoosh.fields import Schema, ID, TEXT
 from whoosh.scoring import TF_IDF, BM25F
 from whoosh.analysis import (
@@ -60,18 +60,22 @@ class DocDatabaseWhoosh(DocDatabase):
             )
         )
 
-        if not os.path.exists(storage_dir):
-            os.makedirs(storage_dir)
-            create_in(
-                storage_dir,
+        self.TRY_LIMIT = 40
+    
+    def get_indexer(self):
+        if not os.path.exists(self.STORAGE_DIR):
+            os.makedirs(self.STORAGE_DIR)
+        try:
+            findex = open_dir(self.STORAGE_DIR)
+        except EmptyIndexError:
+            findex = create_in(
+                self.STORAGE_DIR,
                 schema=self.MY_SCHEMA,
             )
-
-        self.TRY_LIMIT = 40
+        return findex
 
     def add(self, **kwargs) -> None:
-        assert os.path.exists(self.STORAGE_DIR)
-        findex = open_dir(self.STORAGE_DIR)
+        findex = self.get_indexer()
         try_count = 0
         while try_count < self.TRY_LIMIT:
             try:
@@ -85,8 +89,7 @@ class DocDatabaseWhoosh(DocDatabase):
         
 
     def add_batch(self, _iterable: Iterable[Dict]) -> None:
-        assert os.path.exists(self.STORAGE_DIR)
-        findex = open_dir(self.STORAGE_DIR)
+        findex = self.get_indexer()
         try_count = 0
         while try_count < self.TRY_LIMIT:
             try:
@@ -101,8 +104,7 @@ class DocDatabaseWhoosh(DocDatabase):
     
     def get_all(self) -> List[dict]:
         """get all documents with fields in `fieldnames`"""
-        assert os.path.exists(self.STORAGE_DIR)
-        findex = open_dir(self.STORAGE_DIR)
+        findex = self.get_indexer()
         reader = findex.reader()
         all_items: List[dict] = list(reader.all_stored_fields())
         return all_items
@@ -113,9 +115,7 @@ class DocDatabaseWhoosh(DocDatabase):
             fieldname:str = 'content',
             topk: int = 2,
             timelimit: Union[float ,None] = None) -> List[RelevantDoc]:
-        assert os.path.exists(self.STORAGE_DIR)
-        findex = open_dir(self.STORAGE_DIR)
-
+        findex = self.get_indexer()
         with findex.searcher(weighting=self.MY_SCORE_FUNC) as searcher:
             parser = QueryParser(fieldname, findex.schema)
             query = parser.parse(query)

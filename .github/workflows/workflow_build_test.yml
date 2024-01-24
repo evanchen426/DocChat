@@ -35,4 +35,4 @@ jobs:
         python3 process_test_articles.py
     - name: Test ask.py
       run: |
-        python3 -m unittest ./python_test/test_ask.py
+        python3 -m unittest ./python_tests/test_ask.py

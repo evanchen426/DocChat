@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-n-test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
@@ -30,13 +30,6 @@ jobs:
         npm install
     - name: Build npm
       run: npm run build
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
     - name: Make test articles
       run: |
         python3 process_test_articles.py

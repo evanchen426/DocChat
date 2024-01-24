@@ -2,7 +2,7 @@ name: python and node install build start workflow
 
 on:
   push:
-    branches: [ main, adddocker2 ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 

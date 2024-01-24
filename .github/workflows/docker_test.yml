@@ -2,7 +2,7 @@ name: docker build test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, adddocker2 ]
   pull_request:
     branches: [ main ]
 

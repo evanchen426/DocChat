@@ -1,4 +1,5 @@
 import os
+import re
 import json
 from flask import (
     Flask,
@@ -45,6 +46,17 @@ def list_files():
     filenames = os.listdir(app.config['ORIGINAL_DOCS_FOLDER'])
     return render_template('list_files.html', filenames=filenames)
 
+@app.route('/raw_text/<path:filename>', methods=['GET'])
+def get_raw_text(filename):
+    database = DocDatabaseWhoosh(app.config['DOC_DATABASE_DIR'])
+    all_docs = database.get_all()
+    print([doc for doc in all_docs if 'x-100' in doc['filename']])
+    filter_iter = (doc['content'] for doc in all_docs if doc['filename'] == filename)
+    content = next(filter_iter, None)
+    if content is None:
+        return '404 File not found', 404
+    return content.replace('\n', '<br />')
+
 file_upload_template_str =  """
 <html>
     <body>
@@ -57,6 +69,12 @@ file_upload_template_str =  """
     </body>
 </html>
 """
+
+def my_secure_filename(filename: str) -> str:
+    my_secure_filter = r'[^A-Za-z0-9_\u4e00-\u9fbf\.\-]'
+    filtered_filename = re.sub(my_secure_filter, '', filename)
+    filtered_filename = filtered_filename.strip()
+    return filtered_filename
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -74,16 +92,17 @@ def upload_file():
         database_item_list = []
         for file in uploaded_files:
             if file:
-                filename = secure_filename(file.filename)
+                filename = my_secure_filename(file.filename)
                 file.save(os.path.join(
                     app.config['ORIGINAL_DOCS_FOLDER'],
                     filename
                 ))
-            extracted_text = extract_text_from_pdf(file.stream)
-            database_item_list.append({
-                'filename': file.filename,
-                'content': extracted_text
-            })
+                extracted_text = extract_text_from_pdf(file.stream)
+                database_item_list.append({
+                    'filename': filename,
+                    'content': extracted_text
+                })
+                print(f'Saved file {filename}')
 
         database = DocDatabaseWhoosh(app.config['DOC_DATABASE_DIR'])
         database.add_batch(database_item_list)

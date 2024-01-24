@@ -9,6 +9,7 @@ import { AskSlashCommand } from './commands/ask'
 import { ClearSlashCommand } from './commands/clear'
 import { AskDummySlashCommand } from './commands/ask_dummy'
 import { DiscussSlashCommand } from './commands/discuss'
+import { HelpSlashCommand } from './commands/help'
 import { NewChannelSlashCommand } from './commands/new_channel'
 import { deploySlashCommands } from './deploy'
 import { SlashCommand } from './types/command'
@@ -20,6 +21,7 @@ const commandList: Array<SlashCommand> = [
   AskDummySlashCommand,
   ClearSlashCommand,
   DiscussSlashCommand,
+  HelpSlashCommand,
   NewChannelSlashCommand
 ]
 

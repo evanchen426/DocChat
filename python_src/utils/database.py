@@ -10,7 +10,7 @@ from whoosh.index import create_in, open_dir, EmptyIndexError
 from whoosh.fields import Schema, ID, TEXT
 from whoosh.scoring import TF_IDF, BM25F
 from whoosh.analysis import (
-    RegexAnalyzer, LowercaseFilter, StopFilter
+    RegexTokenizer, LowercaseFilter, StopFilter
 )
 
 from .relevant_doc import RelevantDoc
@@ -46,7 +46,7 @@ class DocDatabaseWhoosh(DocDatabase):
         self.MY_SCORE_FUNC = BM25F()
 
         self.MY_ANALYZER = (
-            RegexAnalyzer()
+            RegexTokenizer()
             | LowercaseFilter()
             | StopFilter()
         )

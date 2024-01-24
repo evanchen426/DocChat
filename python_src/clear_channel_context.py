@@ -23,9 +23,9 @@ if __name__ == '__main__':
                 os.remove(channel_context_record)
                 print('Success clear discussion history.')
             else:
-                print('Discussion history already empty')
+                print('Discussion history already empty.')
         else:
-            print('Discussion history already empty')
+            print('Discussion history already empty.')
     except Exception as e:
         print(format_exc())
         raise e

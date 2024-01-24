@@ -1,6 +1,5 @@
 name: python and node install build start workflow
 
-
 on:
   push:
     branches: [ main ]
@@ -8,11 +7,10 @@ on:
     branches: [ main ]
 
 jobs:
-  build-linux:
+  build:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.10
@@ -32,6 +30,15 @@ jobs:
         npm install
     - name: Build npm
       run: npm run build
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
     - name: Make test articles
       run: |
         python3 process_test_articles.py
+    - name: Test ask.py
+      run: |
+        python3 -m unittest ./python_test/test_ask.py

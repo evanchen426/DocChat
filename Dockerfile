@@ -19,20 +19,14 @@ RUN apt-get update && \
     node --version && \
     npm --version
 
-# copy pip_requirements.txt to container
-COPY pip_requirements.txt .
-
-# # Install pip dependencies
-RUN pip3 install -r pip_requirements.txt
-
 # 複製 npm 項目到容器中（包括 package.json 和其他必要檔案）
 COPY . /app
 
 # 設定工作目錄
 WORKDIR /app
 
-# copy package.json to container
-COPY package.json .
+# # Install pip dependencies
+RUN pip3 install -r pip_requirements.txt
 
 # Install node dependencies
 RUN npm install

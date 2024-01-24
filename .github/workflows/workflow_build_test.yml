@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v3
     - name: Make test articles
       run: |
         python3 process_test_articles.py

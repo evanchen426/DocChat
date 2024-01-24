@@ -10,12 +10,12 @@ export const HelpSlashCommand: SlashCommand = {
 it can find related documents regarding to your question.
 \`/ask_dummy question\` -- Ask a question and the chatbot will reply with \
 "As an AI asistant, I cannot answer this question."
-\`/discuss question\` -- Ask a question in the channel-wide discussion. In a \
-channel-wide discussion, the chatbot see every questions sent by this command \
-as the continuation of the ongoing conversation about an the first question, \
+\`/discuss question\` -- Ask a question in a channel-wide discussion. In the \
+channel-wide discussion, the chatbot see any question sent by this command \
+as the continuation of the ongoing conversation about the first question, \
 no matter who send them.
 \`/new_discuss\` -- As we may change topic in the channel-wide discussion, \
-this command restart the conversation.
+this command starts a new the conversation.
 \`/new_channel\` -- Create a private channel where there's just you and the \
 chatbot. So that you can have a private discussion with chatbot without \
 anyone bothers you.

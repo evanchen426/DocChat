@@ -3,16 +3,20 @@ import re
 import json
 import os
 import shutil
-from python_src.utils.database import DocDatabaseWhoosh
+import python_src.utils.database as database_impl
+
+with open('./storage_config.json') as f:
+    storage_configs = json.load(f)
+MyDocDatabase = getattr(database_impl, storage_configs['doc_database_impl'])
 
 data = pd.read_csv('test_articles.csv', )
 data = data.astype(str)
 row_num, col_num = data.shape
 
-with open('./storage_path_config.json') as f:
-    storage_paths = json.load(f)
-doc_database_dir = storage_paths['doc_database_dir']
-original_doc_files_dir = storage_paths['original_doc_files_dir']
+with open('./storage_config.json') as f:
+    storage_configs = json.load(f)
+doc_database_dir = storage_configs['doc_database_dir']
+original_doc_files_dir = storage_configs['original_doc_files_dir']
 
 if os.path.exists(original_doc_files_dir):
     shutil.rmtree(original_doc_files_dir)
@@ -20,7 +24,7 @@ os.makedirs(original_doc_files_dir, exist_ok=True)
 
 if os.path.exists(doc_database_dir):
     shutil.rmtree(doc_database_dir)
-doc_database = DocDatabaseWhoosh(doc_database_dir)
+doc_database = MyDocDatabase(doc_database_dir)
 
 all_articles = [
     {

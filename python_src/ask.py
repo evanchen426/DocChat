@@ -4,14 +4,18 @@ from json.decoder import JSONDecodeError
 from traceback import format_exc
 from argparse import ArgumentParser
 
-from utils.database import DocDatabaseWhoosh
+import utils.database as database_impl 
 # from utils.relevant_doc import RelevantDoc
 from utils.ai_caller import VertexAICaller, DummyAICaller
 
-with open('storage_path_config.json', 'r') as f:
-    storage_paths = json.load(f)
-    context_record_dir = storage_paths['context_records_dir']
-    doc_database_dir = storage_paths['doc_database_dir']
+with open('./storage_config.json') as f:
+    storage_configs = json.load(f)
+MyDocDatabase = getattr(database_impl, storage_configs['doc_database_impl'])
+
+with open('storage_config.json', 'r') as f:
+    storage_configs = json.load(f)
+    context_record_dir = storage_configs['context_records_dir']
+    doc_database_dir = storage_configs['doc_database_dir']
 
 def ask_module(
         question_string: str,
@@ -34,7 +38,7 @@ def ask_module(
             with open(context_record_path, 'r') as f:
                 context = json.load(f)
         except (AssertionError, JSONDecodeError):
-            database = DocDatabaseWhoosh(doc_database_dir)
+            database = MyDocDatabase(doc_database_dir)
             relevant_doc_list = database.search(
                 question_string,
                 topk=search_topk
@@ -53,7 +57,7 @@ def ask_module(
             json.dump(new_context, f)
 
     else:
-        database = DocDatabaseWhoosh(doc_database_dir)
+        database = MyDocDatabase(doc_database_dir)
         relevant_doc_list = database.search(
             question_string,
             topk=search_topk

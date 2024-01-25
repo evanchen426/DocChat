@@ -4,31 +4,34 @@ import json
 from flask import (
     Flask,
     request,
-    send_from_directory,
     render_template,
     render_template_string
 )
-from werkzeug.utils import secure_filename
+# from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
-from utils.database import DocDatabaseWhoosh
+import utils.database as database_impl 
 from utils.pdf2txt import extract_text_from_pdf
 
-with open('./storage_path_config.json') as f:
-    storage_paths = json.load(f)
-os.makedirs(storage_paths['original_doc_files_dir'], exist_ok=True)
-os.makedirs(storage_paths['doc_database_dir'], exist_ok=True)
+with open('./storage_config.json') as f:
+    storage_configs = json.load(f)
+MyDocDatabase = getattr(database_impl, storage_configs['doc_database_impl'])
+
+with open('./storage_config.json') as f:
+    storage_configs = json.load(f)
+os.makedirs(storage_configs['original_doc_files_dir'], exist_ok=True)
+os.makedirs(storage_configs['doc_database_dir'], exist_ok=True)
 
 app = Flask(
     __name__,
     static_url_path='/static',
     static_folder=os.path.join(
         os.getcwd(),
-        storage_paths['original_doc_files_dir']
+        storage_configs['original_doc_files_dir']
     )
 )
-app.config['ORIGINAL_DOCS_FOLDER'] = storage_paths['original_doc_files_dir']
-app.config['DOC_DATABASE_DIR'] = storage_paths['doc_database_dir']
+app.config['ORIGINAL_DOCS_FOLDER'] = storage_configs['original_doc_files_dir']
+app.config['DOC_DATABASE_DIR'] = storage_configs['doc_database_dir']
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 
 ALLOWED_EXTENSIONS = set(['.pdf'])
@@ -48,7 +51,7 @@ def list_files():
 
 @app.route('/text/<path:filename>', methods=['GET'])
 def get_raw_text(filename):
-    database = DocDatabaseWhoosh(app.config['DOC_DATABASE_DIR'])
+    database = MyDocDatabase(app.config['DOC_DATABASE_DIR'])
     all_docs = database.get_all()
     print([doc for doc in all_docs if 'x-100' in doc['filename']])
     filter_iter = (doc['content'] for doc in all_docs if doc['filename'] == filename)
@@ -104,7 +107,7 @@ def upload_file():
                 })
                 print(f'Saved file {filename}')
 
-        database = DocDatabaseWhoosh(app.config['DOC_DATABASE_DIR'])
+        database = MyDocDatabase(app.config['DOC_DATABASE_DIR'])
         database.add_batch(database_item_list)
 
         return render_template_string(

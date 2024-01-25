@@ -1,8 +1,16 @@
 
+import io
+import json
 import os
+import zipfile
 from time import sleep
 from typing import List, Iterable, Dict, Union
 
+import numpy as np
+import text2vec
+from text2vec import SentenceModel, semantic_search
+
+from torch import Tensor
 from jieba.analyse import ChineseAnalyzer
 from whoosh.analysis import (
     RegexTokenizer, LowercaseFilter, StopFilter
@@ -27,13 +35,10 @@ class DocDatabase:
     def add_batch(self, _iterable: Iterable[Dict]) -> None:
         raise NotImplementedError()
 
-    def get_all(self, fieldnames) -> List[dict]:
+    def get_all(self) -> List[dict]:
         raise NotImplementedError()
 
-    def delete(self, filename: str) -> None:
-        raise NotImplementedError()
-
-    def search(query: str) -> List[RelevantDoc]:
+    def search(query: str, topk: int = 2) -> List[RelevantDoc]:
         raise NotImplementedError()
 
 
@@ -118,8 +123,8 @@ class DocDatabaseWhoosh(DocDatabase):
     def search(
             self,
             query: str,
+            topk: int,
             fieldname :str = 'content',
-            topk: int = 2,
             timelimit: Union[float, None] = 3.0) -> List[RelevantDoc]:
         findex = self.get_indexer()
         parser = QueryParser(fieldname, findex.schema, group=OrGroup)
@@ -146,3 +151,88 @@ class DocDatabaseWhoosh(DocDatabase):
             ]
         return relevant_doc_list
 
+
+class DocDatabaseText2Vec(DocDatabase):
+
+    def __init__(self, storage_dir: str):
+        self.STORAGE_DIR = storage_dir
+        self.NPZ_PATH = os.path.join(storage_dir, 'vectors.npz')
+        self.CONTENT_PATH = os.path.join(storage_dir, 'contents.zip')
+        self.model = SentenceModel()
+        os.makedirs(storage_dir, exist_ok=True)
+        
+    def get_vector_file(self):
+        if os.path.exists(self.NPZ_PATH):
+            return zipfile.ZipFile(self.NPZ_PATH, 'a')
+        else:
+            return zipfile.ZipFile(self.NPZ_PATH, 'w')
+    
+    def get_content_file(self):
+        if os.path.exists(self.CONTENT_PATH):
+            return zipfile.ZipFile(self.CONTENT_PATH, 'a')
+        else:
+            return zipfile.ZipFile(self.CONTENT_PATH, 'w')
+
+    def add(self, **kwargs) -> None:
+        filename: str = kwargs['filename']
+        content: str = kwargs['content'], 
+        vec = self.model.encode(content)
+        vec_bytes_io = io.BytesIO()
+        np.save(vec_bytes_io, vec)
+        with self.get_vector_file() as vectorf, \
+                self.get_content_file() as contentf:
+            contentf.writestr(
+                f'{filename}.txt',
+                content.encode()
+            )
+            vectorf.writestr(
+                f'{filename}.npy',
+                vec_bytes_io.getbuffer().tobytes()
+            )
+
+    def add_batch(self, _iterable: Iterable[Dict]) -> None:
+        with self.get_vector_file() as vectorf, \
+                self.get_content_file() as contentf:
+            for item in _iterable:
+                filename: str = item['filename']
+                content: str = item['content']
+                vec = self.model.encode(content)
+                vec_bytes_io = io.BytesIO()
+                np.save(vec_bytes_io, vec)
+                contentf.writestr(
+                    f'{filename}',
+                    content.encode()
+                )
+                vectorf.writestr(
+                    f'{filename}.npy',
+                    vec_bytes_io.getbuffer().tobytes()
+                )
+
+    def get_all(self) -> List[dict]:
+        all_items = []
+        with self.get_content_file() as contentf:
+            for infos in contentf.infolist():
+                with contentf.open(infos) as file:
+                    all_items.append({
+                        'filename': infos.filename,
+                        'content': file.read().decode()
+                    })
+        return all_items
+
+    def search(self, query: str, topk: int) -> List[RelevantDoc]:
+        query_vec = self.model.encode(query)
+        npzf = np.load(self.NPZ_PATH)
+        filenames = [filename for filename in npzf.keys()]
+        doc_vecs = Tensor(np.array([doc_vec for doc_vec in npzf.values()]))
+        hits_list = semantic_search(query_vec, doc_vecs, top_k=topk)[0]
+        relevant_docs = []
+        with self.get_content_file() as contentf:
+            relevant_docs = [
+                RelevantDoc(
+                    filenames[hit['corpus_id']],
+                    hit['score'],
+                    contentf.open(filenames[hit['corpus_id']]).read()
+                )
+                for hit in hits_list
+            ]
+        return relevant_docs

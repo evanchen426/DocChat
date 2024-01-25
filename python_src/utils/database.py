@@ -3,15 +3,16 @@ import os
 from time import sleep
 from typing import List, Iterable, Dict, Union
 
-from whoosh.collectors import TimeLimitCollector, TimeLimit
-from whoosh.qparser import QueryParser
-from whoosh.writing import LockError
-from whoosh.index import create_in, open_dir, EmptyIndexError
-from whoosh.fields import Schema, ID, TEXT
-from whoosh.scoring import TF_IDF, BM25F
+from jieba.analyse import ChineseAnalyzer
 from whoosh.analysis import (
     RegexTokenizer, LowercaseFilter, StopFilter
 )
+from whoosh.collectors import TimeLimitCollector, TimeLimit
+from whoosh.fields import Schema, ID, TEXT
+from whoosh.index import create_in, open_dir, EmptyIndexError
+from whoosh.scoring import TF_IDF, BM25F
+from whoosh.qparser import QueryParser, OrGroup
+from whoosh.writing import LockError
 
 from .relevant_doc import RelevantDoc
 
@@ -45,10 +46,15 @@ class DocDatabaseWhoosh(DocDatabase):
         # self.MY_SCORE_FUNC = TF_IDF()
         self.MY_SCORE_FUNC = BM25F()
 
+        # self.MY_ANALYZER = (
+        #     RegexTokenizer()
+        #     | LowercaseFilter()
+        #     | StopFilter()
+        # )
+
         self.MY_ANALYZER = (
-            RegexTokenizer()
+            ChineseAnalyzer()
             | LowercaseFilter()
-            | StopFilter()
         )
 
         self.MY_SCHEMA = Schema(
@@ -116,8 +122,9 @@ class DocDatabaseWhoosh(DocDatabase):
             topk: int = 2,
             timelimit: Union[float, None] = 3.0) -> List[RelevantDoc]:
         findex = self.get_indexer()
-        parser = QueryParser(fieldname, findex.schema)
+        parser = QueryParser(fieldname, findex.schema, group=OrGroup)
         query = parser.parse(query)
+        # print(query)
         relevant_doc_list = []
         with findex.searcher() as searcher:
             # results = searcher.search(query, limit=topk)
@@ -132,6 +139,7 @@ class DocDatabaseWhoosh(DocDatabase):
             except TimeLimit:
                 pass
             results = collector.results()
+
             relevant_doc_list = [
                 RelevantDoc(res["filename"], res.score, res["content"])
                 for res in results

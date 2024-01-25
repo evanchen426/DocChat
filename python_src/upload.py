@@ -46,7 +46,7 @@ def list_files():
     filenames = os.listdir(app.config['ORIGINAL_DOCS_FOLDER'])
     return render_template('list_files.html', filenames=filenames)
 
-@app.route('/raw_text/<path:filename>', methods=['GET'])
+@app.route('/text/<path:filename>', methods=['GET'])
 def get_raw_text(filename):
     database = DocDatabaseWhoosh(app.config['DOC_DATABASE_DIR'])
     all_docs = database.get_all()

@@ -15,7 +15,10 @@
     <div class="bg-white p-10 rounded-lg shadow-lg">
         <ul>
             {% for filename in filenames %}
-                <li>{{ loop.index }}. <a href="{{ url_for('static', filename=filename) }}" class="text-blue-600 underline">{{ filename }}</a></li>
+                <li>{{ loop.index }}.
+                  <a href="{{ url_for('static', filename=filename) }}" class="text-blue-600 underline">{{ filename }}</a>
+                  (<a href="/text/{{ filename }}" class="text-blue-600 underline">Plain text version</a>)
+                </li>
             {% endfor %}
         </ul>
     </div>

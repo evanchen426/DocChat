@@ -1,5 +1,5 @@
 import re
-from xml.etree import ElementTree
+from jieba.analyse import ChineseAnalyzer
 from typing import BinaryIO
 
 # import pypdf
@@ -13,6 +13,9 @@ import pdfquery
 #         page.extract_text()
 #         for page in reader.pages
 #     ])
+
+def contain_chinese(s: str) -> bool:
+    return re.match(r'\u4e00-\u9fff', s) is not None
 
 def extract_text_from_pdf(pdf_file: BinaryIO) -> str:
     pdf = pdfquery.PDFQuery(pdf_file)

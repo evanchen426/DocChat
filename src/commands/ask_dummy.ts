@@ -25,6 +25,7 @@ export const AskDummySlashCommand: SlashCommand = {
       '-u',
       './python_src/ask.py',
       '--ai-backend', 'dummy',
+      '--is-debug',
       `${question}`
     ];
 

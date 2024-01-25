@@ -26,6 +26,7 @@ export const DiscussSlashCommand: SlashCommand = {
       './python_src/ask.py',
       `${question}`,
       '--channel-id', channel_id,
+      '2>/dev/null'
     ];
 
     console.log(

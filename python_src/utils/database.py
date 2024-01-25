@@ -7,8 +7,8 @@ from time import sleep
 from typing import List, Iterable, Dict, Union
 
 import numpy as np
-import text2vec
-from text2vec import SentenceModel, semantic_search
+from sentence_transformers import SentenceTransformer
+from sentence_transformers.util import semantic_search
 
 from torch import Tensor
 from jieba.analyse import ChineseAnalyzer
@@ -18,11 +18,17 @@ from whoosh.analysis import (
 from whoosh.collectors import TimeLimitCollector, TimeLimit
 from whoosh.fields import Schema, ID, TEXT
 from whoosh.index import create_in, open_dir, EmptyIndexError
-from whoosh.scoring import TF_IDF, BM25F
 from whoosh.qparser import QueryParser, OrGroup
 from whoosh.writing import LockError
 
 from .relevant_doc import RelevantDoc
+
+storage_configs = {}
+try:
+    with open('./storage_config.json') as f:
+        storage_configs = json.load(f)
+except json.decoder.JSONDecodeError as e:
+    raise e
 
 class DocDatabase:
 
@@ -47,9 +53,6 @@ class DocDatabaseWhoosh(DocDatabase):
     def __init__(self, storage_dir):
         super().__init__()
         self.STORAGE_DIR = storage_dir
-
-        # self.MY_SCORE_FUNC = TF_IDF()
-        self.MY_SCORE_FUNC = BM25F()
 
         # self.MY_ANALYZER = (
         #     RegexTokenizer()
@@ -152,13 +155,13 @@ class DocDatabaseWhoosh(DocDatabase):
         return relevant_doc_list
 
 
-class DocDatabaseText2Vec(DocDatabase):
+class DocDatabaseSBERT(DocDatabase):
 
     def __init__(self, storage_dir: str):
         self.STORAGE_DIR = storage_dir
         self.NPZ_PATH = os.path.join(storage_dir, 'vectors.npz')
         self.CONTENT_PATH = os.path.join(storage_dir, 'contents.zip')
-        self.model = SentenceModel()
+        self.model = SentenceTransformer(storage_configs['sentence_transformer_model'])
         os.makedirs(storage_dir, exist_ok=True)
         
     def get_vector_file(self):
@@ -236,3 +239,5 @@ class DocDatabaseText2Vec(DocDatabase):
                 for hit in hits_list
             ]
         return relevant_docs
+
+MyDocDatabase = globals().get(storage_configs['doc_database_impl'], None)

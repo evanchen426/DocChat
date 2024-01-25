@@ -4,13 +4,8 @@ from json.decoder import JSONDecodeError
 from traceback import format_exc
 from argparse import ArgumentParser
 
-import utils.database as database_impl 
-# from utils.relevant_doc import RelevantDoc
+from utils.database import storage_configs, MyDocDatabase
 from utils.ai_caller import VertexAICaller, DummyAICaller
-
-with open('./storage_config.json') as f:
-    storage_configs = json.load(f)
-MyDocDatabase = getattr(database_impl, storage_configs['doc_database_impl'])
 
 with open('storage_config.json', 'r') as f:
     storage_configs = json.load(f)

@@ -32,7 +32,7 @@ jobs:
       run: npm run build
     - name: Make test articles
       run: |
-        python3 process_test_articles.py
+        python3 -m python_src.tests.process_test_articles
     - name: Test ask.py
       run: |
-        python3 -m unittest ./python_tests/test_ask.py
+        python3 -m unittest ./python_src/tests/test_ask.py

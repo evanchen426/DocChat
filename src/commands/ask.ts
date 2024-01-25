@@ -24,7 +24,8 @@ export const AskSlashCommand: SlashCommand = {
     let python_args = [
       '-u',
       './python_src/ask.py',
-      `${question}`
+      `${question}`,
+      '2>/dev/null'
     ];
 
     console.log(

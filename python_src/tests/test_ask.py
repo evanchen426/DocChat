@@ -12,11 +12,12 @@ class TestAskCommand(unittest.TestCase):
         ], stdout=subprocess.PIPE)
         expected_stdout = (
 b"""Relevant Docs:
-- How to French Kiss.txt
+- How to French Kiss.txt : 3.6657202728332234
 kiss
 As an AI assistant, I cannot answer this question.
 """
         )
+        # print(result.stdout)
         self.assertEqual(result.stdout, expected_stdout)
     
     def test_discuss(self):
@@ -41,7 +42,7 @@ As an AI assistant, I cannot answer this question.
         ]
         expected_stdout = (
 b"""Relevant Docs:
-- How to Take a Screenshot on a Windows PC: 8 Simple Tricks.txt
+- How to Take a Screenshot on a Windows PC: 8 Simple Tricks.txt : 3.672123491438766
 screenshot
 As an AI assistant, I cannot answer this question.
 screenshot
@@ -56,5 +57,6 @@ This is the 3 times I said this. As an AI assistant, I cannot answer this questi
         self.assertEqual(returncode, 0)
 
         result = subprocess.run(discuss_args, stdout=subprocess.PIPE)
+        # print(result.stdout)
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stdout, expected_stdout)

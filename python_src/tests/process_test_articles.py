@@ -3,13 +3,10 @@ import re
 import json
 import os
 import shutil
-import python_src.utils.database as database_impl
+import sys
+from ..utils.database import storage_configs, MyDocDatabase
 
-with open('./storage_config.json') as f:
-    storage_configs = json.load(f)
-MyDocDatabase = getattr(database_impl, storage_configs['doc_database_impl'])
-
-data = pd.read_csv('test_articles.csv', )
+data = pd.read_csv('./python_src/tests/test_articles.csv', )
 data = data.astype(str)
 row_num, col_num = data.shape
 

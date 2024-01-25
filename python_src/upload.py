@@ -1,6 +1,5 @@
 import os
 import re
-import json
 from flask import (
     Flask,
     request,
@@ -8,17 +7,10 @@ from flask import (
     render_template_string
 )
 # from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
 
-import utils.database as database_impl 
+from utils.database import storage_configs, MyDocDatabase
 from utils.pdf2txt import extract_text_from_pdf
 
-with open('./storage_config.json') as f:
-    storage_configs = json.load(f)
-MyDocDatabase = getattr(database_impl, storage_configs['doc_database_impl'])
-
-with open('./storage_config.json') as f:
-    storage_configs = json.load(f)
 os.makedirs(storage_configs['original_doc_files_dir'], exist_ok=True)
 os.makedirs(storage_configs['doc_database_dir'], exist_ok=True)
 

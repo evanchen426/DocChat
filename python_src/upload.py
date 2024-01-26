@@ -88,11 +88,14 @@ def upload_file():
         for file in uploaded_files:
             if file:
                 filename = my_secure_filename(file.filename)
+                try:
+                    extracted_text = extract_text_from_pdf(file.stream)
+                except:
+                    continue
                 file.save(os.path.join(
                     app.config['ORIGINAL_DOCS_FOLDER'],
                     filename
                 ))
-                extracted_text = extract_text_from_pdf(file.stream)
                 database_item_list.append({
                     'filename': filename,
                     'content': extracted_text

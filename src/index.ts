@@ -59,8 +59,8 @@ setBotListener(client, commandList)
 client
   .login(appConfig.token)
   .then(() => console.log(`Login successfully!`))
-  .catch((reason) => console.log(`Failed to login: ${reason}`))
   .then(() => {
     const pythonExec = spawn('python3', ['./python_src/upload.py', '80']);
     pythonExec.stdout.on('data', (log) => console.log(log.toString()));
-  });
+  })
+  .catch((reason) => console.log(`Failed to login: ${reason}`))

@@ -26,8 +26,8 @@ As an AI assistant, I cannot answer this question.
             'python3', './python_src/clear_channel_record.py', '123'
         ], stdout=subprocess.PIPE)
         possible_expect_stdouts = {
-            b'Discussion history already empty.\n',
-            b'Success clear discussion history.\n',
+            b'Conversation history already empty.\n',
+            b'Success clear conversation history.\n',
         }
         self.assertEqual(result.returncode, 0)
         self.assertIn(result.stdout, possible_expect_stdouts)

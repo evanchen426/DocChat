@@ -13,7 +13,7 @@ if __name__ == '__main__':
     try:
         with open('storage_config.json', 'r') as f:
             storage_configs = json.load(f)
-        context_record_dir = storage_configs['context_records_dir']
+        context_record_dir = storage_configs['channel_records_dir']
         if os.path.exists(context_record_dir):
             channel_context_record = os.path.join(
                 context_record_dir,
@@ -21,11 +21,11 @@ if __name__ == '__main__':
             )
             if os.path.exists(channel_context_record):
                 os.remove(channel_context_record)
-                print('Success clear discussion history.')
+                print('Success clear conversation history.')
             else:
-                print('Discussion history already empty.')
+                print('Conversation history already empty.')
         else:
-            print('Discussion history already empty.')
+            print('Conversation history already empty.')
     except Exception as e:
         print(format_exc())
         raise e

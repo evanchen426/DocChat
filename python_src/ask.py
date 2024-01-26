@@ -9,7 +9,7 @@ from utils.ai_caller import VertexAICaller, DummyAICaller
 
 with open('storage_config.json', 'r') as f:
     storage_configs = json.load(f)
-    context_record_dir = storage_configs['context_records_dir']
+    context_record_dir = storage_configs['channel_records_dir']
     doc_database_dir = storage_configs['doc_database_dir']
 
 def ask_module(

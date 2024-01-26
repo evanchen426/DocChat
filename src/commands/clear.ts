@@ -11,12 +11,12 @@ export const ClearSlashCommand: SlashCommand = {
     let channel_id = interaction.channelId;
     let python_args = [
       '-u',
-      './python_src/clear_channel_context.py',
+      './python_src/clear_channel_record.py',
       `${channel_id}`
     ];
     console.log(
       `User ${interaction.user.username} `
-      + `clears the context reocrd of channel ${channel_id}`
+      + `clears the conversation reocrd of channel ${channel_id}`
     )
 
     let respMsg = '';

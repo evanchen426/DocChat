@@ -77,7 +77,7 @@ class DummyAICaller():
             self,
             relevant_doc_list: List[RelevantDoc]) -> str:
         return 'Relevant Docs:\n' + '\n'.join(
-            [f'- {d.filename} : {d.relevant_score}' for d in relevant_doc_list]
+            [f'- {d.filename}' for d in relevant_doc_list]
         )
 
     def promptify_question(self, question_string: str) -> str:

@@ -241,3 +241,5 @@ class DocDatabaseSBERT(DocDatabase):
         return relevant_docs
 
 MyDocDatabase = globals().get(storage_configs['doc_database_impl'], None)
+# create a instance for loading the model
+MyDocDatabase()

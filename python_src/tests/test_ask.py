@@ -12,7 +12,7 @@ class TestAskCommand(unittest.TestCase):
         ], stdout=subprocess.PIPE)
         expected_stdout = (
 b"""Relevant Docs:
-- How to French Kiss.txt : 3.6657202728332234
+- How to French Kiss.txt
 kiss
 As an AI assistant, I cannot answer this question.
 """
@@ -42,7 +42,7 @@ As an AI assistant, I cannot answer this question.
         ]
         expected_stdout = (
 b"""Relevant Docs:
-- How to Take a Screenshot on a Windows PC: 8 Simple Tricks.txt : 3.672123491438766
+- How to Take a Screenshot on a Windows PC: 8 Simple Tricks.txt
 screenshot
 As an AI assistant, I cannot answer this question.
 screenshot

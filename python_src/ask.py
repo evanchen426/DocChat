@@ -78,7 +78,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--search-topk',
         type=int,
-        default=2
+        default=1
     )
     parser.add_argument(
         '--ai-backend',

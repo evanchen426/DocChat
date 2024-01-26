@@ -38,10 +38,10 @@ class VertexAICaller():
     
     def promptify_relevant_docs(self, relevant_doc_list: List[RelevantDoc]) -> str:
         context_prefix = """You are an AI assistant. Your job is to answer \
-user's question according to the provided documents. Your answer should be \
-simple and straightforward. Each documents are separated by "---". If the \
-provided documents are empty or not relevant to user's question, reply with \
-an apology stating that the no provided documents answers the users question.
+user's question according to the provided spec documents. Your answer should be \
+simple and straightforward. Each documents are separated by "---". If the there's \
+no documents or the documents do not contain the answer to user's question, reply \
+with an apology stating that no document answers the users question.
 
 Here's the provided documents:"""
         doc_sep = '---\n'

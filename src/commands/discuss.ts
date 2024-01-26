@@ -18,7 +18,7 @@ export const DiscussSlashCommand: SlashCommand = {
       await interaction.reply('Error parsing question.');
       return;
     }
-    await interaction.reply('Searching...');
+    await interaction.reply(`[Continuing previous conversation]\nUSER: ${question}\nSearching...`);
 
     let channel_id = interaction.channelId;
     let python_args = [

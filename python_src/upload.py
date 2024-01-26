@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 from flask import (
     Flask,
     request,
@@ -111,4 +112,8 @@ def upload_file():
         )
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    if len(sys.argv) == 2:
+        port = int(sys.argv[1])
+    else:
+        port = 80
+    app.run(host='0.0.0.0', port=port)

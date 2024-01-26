@@ -18,7 +18,7 @@ export const AskSlashCommand: SlashCommand = {
       await interaction.reply('Error parsing question.');
       return;
     }
-    await interaction.reply('Searching...');
+    await interaction.reply(`USER: ${question}\nSearching...`);
 
     let channel_id = interaction.channelId;
     let python_args = [

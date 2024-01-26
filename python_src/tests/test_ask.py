@@ -23,7 +23,7 @@ As an AI assistant, I cannot answer this question.
     def test_discuss(self):
         # clear
         result = subprocess.run([
-            'python3', './python_src/clear_channel_context.py', '123'
+            'python3', './python_src/clear_channel_record.py', '123'
         ], stdout=subprocess.PIPE)
         possible_expect_stdouts = {
             b'Discussion history already empty.\n',

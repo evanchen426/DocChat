@@ -40,8 +40,8 @@ class VertexAICaller():
         context_prefix = """You are an AI assistant. Your job is to answer \
 user's question according to the provided spec documents. Your answer should be \
 simple and straightforward. Each documents are separated by "---". If the there's \
-no documents or the documents do not contain the answer to user's question, reply \
-with an apology stating that no document answers the users question.
+no documents or the documents do not explicitly contain the answer to user's \
+question, reply with an apology stating that no document answers the question.
 
 Here's the provided documents:"""
         doc_sep = '---\n'

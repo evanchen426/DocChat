@@ -1,7 +1,7 @@
 {
     "doc_database_impl": "DocDatabaseSBERT",
     "sentence_transformer_model": "sentence-transformers/distiluse-base-multilingual-cased-v2",
-    "context_records_dir": "./data/context_records",
-    "doc_database_dir": "./data/database",
-    "original_doc_files_dir": "./data/original_doc_files"
+    "context_records_dir": "data/context_records",
+    "doc_database_dir": "data/database",
+    "original_doc_files_dir": "data/original_doc_files"
 }

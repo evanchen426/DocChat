@@ -37,11 +37,11 @@ class VertexAICaller():
             self.PARAMETERS = parameters
     
     def promptify_relevant_docs(self, relevant_doc_list: List[RelevantDoc]) -> str:
-        context_prefix = """Answer user's question according to the provided \
-documents. Your answer should simple and straightforward. Each documents are \
-separated by "---". If the provided documents are empty or not relevant to \
-user's question, reply with an apology stating that the no provided documents \
-answers the users question. User's question starts with "USER:".
+        context_prefix = """You are an AI assistant. Your job is to answer \
+user's question according to the provided documents. Your answer should be \
+simple and straightforward. Each documents are separated by "---". If the \
+provided documents are empty or not relevant to user's question, reply with \
+an apology stating that the no provided documents answers the users question.
 
 Here's the provided documents:"""
         doc_sep = '---\n'
@@ -55,13 +55,13 @@ Here's the provided documents:"""
             context_prefix,
             doc_sep.join(map(str, relevant_doc_list)),
         ]
-        return '\n'.join(prompt_list)
+        return '\n'.join(prompt_list) + '\n'
 
     def promptify_question(self, question_string: str) -> str:
-        return f'\nUSER: {question_string}'
+        return f'USER: {question_string}\nASSISTANT: '
 
     def promptify_response(self, response_string: str) -> str:
-        return f'\nAI: {response_string}'
+        return f'{response_string}\n'
 
     def send_request(self, prompt: str) -> str:
         model = TextGenerationModel.from_pretrained(self.MODEL_NAME)
@@ -70,6 +70,7 @@ Here's the provided documents:"""
             **self.PARAMETERS,
         )
         return response.text
+        # return 'AAA'
     
 class DummyAICaller():
 

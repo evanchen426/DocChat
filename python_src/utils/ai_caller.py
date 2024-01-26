@@ -41,7 +41,7 @@ class VertexAICaller():
 documents. Your answer should simple and straightforward. Each documents are \
 separated by "---". If the provided documents are empty or not relevant to \
 user's question, reply with an apology stating that the no provided documents \
-answers the users question.
+answers the users question. User's question starts with "USER:".
 
 Here's the provided documents:"""
         doc_sep = '---\n'

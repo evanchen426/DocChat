@@ -31,7 +31,7 @@ export const DiscussSlashCommand: SlashCommand = {
     console.log(
       `User ${interaction.user.username} `
       + `in channel ${channel_id} `
-      + `asks "${question} in discussion"`
+      + `asks "${question}" in discussion`
     )
 
     let respMsg = '';
@@ -57,7 +57,12 @@ export const DiscussSlashCommand: SlashCommand = {
         respMsg = respMsg.substring(0, discordContentLengthLimit)
           + '[truncated for reply length limit]';
       }
-      interaction.channel?.send(respMsg);
+      try {
+        interaction.channel?.send(respMsg);
+      }
+      catch {
+        interaction.channel?.send('Error sending response');
+      }
     });
   }
 }

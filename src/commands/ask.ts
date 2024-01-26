@@ -56,7 +56,12 @@ export const AskSlashCommand: SlashCommand = {
         respMsg = respMsg.substring(0, discordContentLengthLimit)
           + '[truncated for reply length limit]';
       }
-      interaction.channel?.send(respMsg);
+      try {
+        interaction.channel?.send(respMsg);
+      }
+      catch {
+        interaction.channel?.send('Error sending response');
+      }
     });
   }
 }

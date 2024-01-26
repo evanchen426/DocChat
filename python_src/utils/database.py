@@ -234,7 +234,7 @@ class DocDatabaseSBERT(DocDatabase):
                 RelevantDoc(
                     filenames[hit['corpus_id']],
                     hit['score'],
-                    contentf.open(filenames[hit['corpus_id']]).read()
+                    contentf.open(filenames[hit['corpus_id']]).read().decode()
                 )
                 for hit in hits_list
             ]

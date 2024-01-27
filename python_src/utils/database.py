@@ -161,7 +161,9 @@ class DocDatabaseSBERT(DocDatabase):
         self.STORAGE_DIR = storage_dir
         self.NPZ_PATH = os.path.join(storage_dir, 'vectors.npz')
         self.CONTENT_PATH = os.path.join(storage_dir, 'contents.zip')
-        self.model = SentenceTransformer(storage_configs['sentence_transformer_model'])
+        self.model = SentenceTransformer(
+            storage_configs['sentence_transformer_model']
+        )
         os.makedirs(storage_dir, exist_ok=True)
         
     def get_vector_file(self):
@@ -223,12 +225,14 @@ class DocDatabaseSBERT(DocDatabase):
         return all_items
 
     def search(self, query: str, topk: int) -> List[RelevantDoc]:
+        relevant_docs = []
         query_vec = self.model.encode(query)
+        if os.path.exists(self.NPZ_PATH):
+            return relevant_docs
         npzf = np.load(self.NPZ_PATH)
         filenames = [filename for filename in npzf.keys()]
         doc_vecs = Tensor(np.array([doc_vec for doc_vec in npzf.values()]))
         hits_list = semantic_search(query_vec, doc_vecs, top_k=topk)[0]
-        relevant_docs = []
         with self.get_content_file() as contentf:
             relevant_docs = [
                 RelevantDoc(

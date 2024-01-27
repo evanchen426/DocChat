@@ -227,7 +227,7 @@ class DocDatabaseSBERT(DocDatabase):
     def search(self, query: str, topk: int) -> List[RelevantDoc]:
         relevant_docs = []
         query_vec = self.model.encode(query)
-        if os.path.exists(self.NPZ_PATH):
+        if not os.path.exists(self.NPZ_PATH):
             return relevant_docs
         npzf = np.load(self.NPZ_PATH)
         filenames = [filename for filename in npzf.keys()]
